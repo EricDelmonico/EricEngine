@@ -6,22 +6,24 @@
 #include <unordered_map>
 #include "D3DResources.h"
 #include <memory>
+#include "SimpleShader.h"
 
 class AssetManager
 {
 public:
     AssetManager(std::shared_ptr<D3DResources> d3dResources);
 
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> GetPixelShader(std::string name);
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> GetVertexShader(std::string name);
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> GetInputLayout(std::string name) { return m_inputLayouts[name]; }
+    std::shared_ptr<SimplePixelShader> GetPixelShader(std::wstring name);
+    std::shared_ptr<SimpleVertexShader> GetVertexShader(std::wstring name);
 
 private:
     std::shared_ptr<D3DResources> m_d3dResources;
 
-    std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> m_pixelShaders;
-    std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> m_vertexShaders;
-    std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>> m_inputLayouts;
+    std::unordered_map<std::wstring, std::shared_ptr<SimplePixelShader>> m_pixelShaders;
+    std::unordered_map<std::wstring, std::shared_ptr<SimpleVertexShader>> m_vertexShaders;
 
+    std::wstring GetExePathLong();
     std::string GetExePath();
+
+    void ImportAsset();
 };

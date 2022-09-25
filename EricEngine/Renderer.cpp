@@ -29,33 +29,28 @@ void Renderer::Render(std::vector<std::shared_ptr<Entity>> entities)
     context->OMSetRenderTargets(1, &renderTarget, depthStencilView);
 
     // Set up vertex shader
-    context->VSSetShader(m_assetManager->GetVertexShader("VertexShader").Get(), nullptr, 0);
+    auto vertexShader = m_assetManager->GetVertexShader(L"VertexShader");
+    vertexShader->SetShader();
 
     // Set up pixel shader
-    context->PSSetShader(m_assetManager->GetPixelShader("PixelShader").Get(), nullptr, 0);
-    
-    // Set up IA for every mesh
-    UINT stride = sizeof(VertexPositionColor);
-    UINT offset = 0;
-    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    context->IASetInputLayout(m_assetManager->GetInputLayout("VertexShader").Get());
+    auto pixelShader = m_assetManager->GetPixelShader(L"PixelShader");
+    pixelShader->SetShader();
 
     // Only need one view/projection for all models
-    m_externalData.View = m_camera->GetView();
-    m_externalData.Projection = m_camera->GetProjection();
+    vertexShader->SetMatrix4x4("view", m_camera->GetView());
+    vertexShader->SetMatrix4x4("projection", m_camera->GetProjection());
 
     // Draw each entity
     for (auto& entity : entities)
     {
         // Set up cbuffer data
         Transform* transform = entity->GetTransform();
-        m_externalData.Model = transform->GetWorldMatrix();
-        context->UpdateSubresource(m_cbuffer.Get(), 0, nullptr, &m_externalData, 0, 0);
-
-        // Send cbuffer data to vertex shader
-        context->VSSetConstantBuffers(0, 1, m_cbuffer.GetAddressOf());
+        vertexShader->SetMatrix4x4("model", transform->GetWorldMatrix());
+        vertexShader->CopyAllBufferData();
 
         auto mesh = entity->GetMesh();
+        UINT stride = sizeof(VertexPositionColor);
+        UINT offset = 0;
         context->IASetVertexBuffers(0, 1, mesh->GetVertexBuffer().GetAddressOf(), &stride, &offset);
         context->IASetIndexBuffer(mesh->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0);
 

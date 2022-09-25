@@ -17,6 +17,9 @@ public:
     ID3D11Device* GetDevice() { return m_device.Get(); }
     ID3D11DeviceContext* GetContext() { return m_context.Get(); }
 
+    Microsoft::WRL::ComPtr<ID3D11Device> GetDeviceComPtr() { return m_device; }
+    Microsoft::WRL::ComPtr<ID3D11DeviceContext> GetContextComPtr() { return m_context; }
+
     ID3D11RenderTargetView* GetRenderTarget() { return m_renderTarget.Get(); }
     ID3D11DepthStencilView* GetDepthStencilView() { return m_depthStencilView.Get(); }
 
