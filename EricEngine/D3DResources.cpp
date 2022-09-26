@@ -138,4 +138,6 @@ HRESULT D3DResources::Initialize(HWND hWnd)
 
         m_context->RSSetViewports(1, &m_viewport);
     }
+
+    m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
