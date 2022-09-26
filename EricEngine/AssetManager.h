@@ -7,6 +7,7 @@
 #include "D3DResources.h"
 #include <memory>
 #include "SimpleShader.h"
+#include "Mesh.h"
 
 class AssetManager
 {
@@ -15,6 +16,11 @@ public:
 
     std::shared_ptr<SimplePixelShader> GetPixelShader(std::wstring name);
     std::shared_ptr<SimpleVertexShader> GetVertexShader(std::wstring name);
+    /// <summary>
+    /// Load in a mesh. NOTE: For now, only supports a simple scene with only one mesh, and no bells and whistles.
+    /// </summary>
+    /// <returns></returns>
+    std::shared_ptr<Mesh> LoadMesh();
 
 private:
     std::shared_ptr<D3DResources> m_d3dResources;
@@ -24,6 +30,4 @@ private:
 
     std::wstring GetExePathLong();
     std::string GetExePath();
-
-    void ImportAsset();
 };

@@ -5,13 +5,13 @@
 class Entity
 {
 public:
-    Entity(Transform transform, Mesh mesh);
+    Entity(Transform transform, Mesh* mesh);
 
     Transform* GetTransform() { return &m_transform; }
-    Mesh* GetMesh() { return &m_mesh; }
+    Mesh* GetMesh() { return m_mesh; }
 
 private:
     Transform m_transform;
-    Mesh m_mesh;
+    Mesh* m_mesh;
 };
 

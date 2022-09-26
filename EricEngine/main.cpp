@@ -41,9 +41,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, camera, assetManager.get());
 
     // Create a basic cube entity
-    Mesh mesh = Mesh::CreateCube(d3dResources);
+    std::shared_ptr<Mesh> mesh = assetManager->LoadMesh();
     Transform transform = Transform();
-    std::shared_ptr<Entity> cube = std::make_shared<Entity>(transform, mesh);
+    std::shared_ptr<Entity> cube = std::make_shared<Entity>(transform, mesh.get());
     std::vector<std::shared_ptr<Entity>> entities;
     entities.push_back(cube);
 
@@ -60,7 +60,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         {
             Input::GetInstance().Update();
 
-            camera->Update(.016f);
+            camera->Update(.004f);
 
             renderer->Render(entities);
 
