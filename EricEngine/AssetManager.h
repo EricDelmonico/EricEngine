@@ -17,10 +17,10 @@ public:
     std::shared_ptr<SimplePixelShader> GetPixelShader(std::wstring name);
     std::shared_ptr<SimpleVertexShader> GetVertexShader(std::wstring name);
     /// <summary>
-    /// Load in a mesh. NOTE: For now, only supports a simple scene with only one mesh, and no bells and whistles.
+    /// Load in a mesh. NOTE: For now, only supports a simple scene with only one mesh, and no bells and whistles such as UV's, normals, or tangents.
     /// </summary>
     /// <returns></returns>
-    std::shared_ptr<Mesh> LoadMesh();
+    std::shared_ptr<Mesh> LoadMesh(std::string name);
 
 private:
     std::shared_ptr<D3DResources> m_d3dResources;

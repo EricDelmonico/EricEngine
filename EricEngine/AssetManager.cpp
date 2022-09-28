@@ -87,16 +87,17 @@ std::string AssetManager::GetExePath()
     return path;
 }
 
-std::shared_ptr<Mesh> AssetManager::LoadMesh()
+std::shared_ptr<Mesh> AssetManager::LoadMesh(std::string name)
 {
     // Create an instance of the importer class
     Assimp::Importer importer;
 
-    const aiScene* scene = importer.ReadFile(AssetManager::GetExePath() + "../../Assets/Models/cylinder.obj",
+    const aiScene* scene = importer.ReadFile(AssetManager::GetExePath() + "../../Assets/Models/" + name,
         aiProcess_CalcTangentSpace      |
         aiProcess_Triangulate           |
         aiProcess_JoinIdenticalVertices |
-        aiProcess_SortByPType);
+        aiProcess_FlipWindingOrder      |
+        aiProcess_ConvertToLeftHanded);
 
     // We don't have a scene, we don't have a mesh
     if (!scene) return nullptr;
@@ -112,17 +113,16 @@ std::shared_ptr<Mesh> AssetManager::LoadMesh()
         
         // Turn mesh verts into our vertex struct
         DirectX::XMFLOAT3* dxPositions = (DirectX::XMFLOAT3*)((void*)assimpMesh->mVertices);
-        VertexPositionColor* vertices = new VertexPositionColor[assimpMesh->mNumVertices];
+        std::vector<VertexPositionColor> vertices;
         for (int i = 0; i < assimpMesh->mNumVertices; i++)
         {
-            srand(i);
-            vertices[i] = { dxPositions[i], DirectX::XMFLOAT3(1.0f / (10 % rand()), 0.0f, 0.5f)};
+            vertices.push_back({ dxPositions[i], DirectX::XMFLOAT3(0.5f, 0.0f, 0.5f) });
         }
 
         // Set up vertex buffer
         CD3D11_BUFFER_DESC vDesc(assimpMesh->mNumVertices * sizeof(VertexPositionColor), D3D11_BIND_VERTEX_BUFFER);
         D3D11_SUBRESOURCE_DATA vData = {};
-        vData.pSysMem = vertices;
+        vData.pSysMem = &vertices[0];
         vData.SysMemPitch = 0;
         vData.SysMemSlicePitch = 0;
 
@@ -130,26 +130,23 @@ std::shared_ptr<Mesh> AssetManager::LoadMesh()
 
         // Set up indices
         int numIndices = assimpMesh->mNumFaces * 3;
-        int* indices = new int[numIndices];
+        std::vector<unsigned int> indices;
         int currentIndex = 0;
         for (int i = 0; i < assimpMesh->mNumFaces; i++) 
         {
-            indices[currentIndex++] = (int)assimpMesh->mFaces[i].mIndices[0];
-            indices[currentIndex++] = (int)assimpMesh->mFaces[i].mIndices[1];
-            indices[currentIndex++] = (int)assimpMesh->mFaces[i].mIndices[2];
+            indices.push_back(assimpMesh->mFaces[i].mIndices[0]);
+            indices.push_back(assimpMesh->mFaces[i].mIndices[1]);
+            indices.push_back(assimpMesh->mFaces[i].mIndices[2]);
         }
 
         // Set up index buffer
         CD3D11_BUFFER_DESC iDesc(numIndices * sizeof(int), D3D11_BIND_INDEX_BUFFER);
         D3D11_SUBRESOURCE_DATA iData = {};
-        iData.pSysMem = indices;
+        iData.pSysMem = &indices[0];
         iData.SysMemPitch = 0;
         iData.SysMemSlicePitch = 0;
 
         m_d3dResources->GetDevice()->CreateBuffer(&iDesc, &iData, &ib);
-
-        delete[] vertices;
-        delete[] indices;
 
         return std::make_shared<Mesh>(m_d3dResources, vb, ib, numIndices);
     }

@@ -52,7 +52,7 @@ void Renderer::Render(std::vector<std::shared_ptr<Entity>> entities)
         UINT stride = sizeof(VertexPositionColor);
         UINT offset = 0;
         context->IASetVertexBuffers(0, 1, mesh->GetVertexBuffer().GetAddressOf(), &stride, &offset);
-        context->IASetIndexBuffer(mesh->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0);
+        context->IASetIndexBuffer(mesh->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
 
         context->DrawIndexed(mesh->GetNumIndices(), 0, 0);
     }
