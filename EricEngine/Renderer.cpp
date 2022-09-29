@@ -1,16 +1,8 @@
 #include "Renderer.h"
 #include "VertexPositionColor.h"
 
-Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<Camera> camera, AssetManager* assetManager) : m_d3dResources(d3dResources), m_camera(camera), m_assetManager(assetManager), m_externalData({})
+Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<Camera> camera, AssetManager* assetManager) : m_d3dResources(d3dResources), m_camera(camera), m_assetManager(assetManager)
 {
-    // Set up cbuffer
-    CD3D11_BUFFER_DESC cbufferDesc(sizeof(ExternalData), D3D11_BIND_CONSTANT_BUFFER);
-    D3D11_SUBRESOURCE_DATA cbufferData = {};
-    cbufferData.pSysMem = &m_externalData;
-    cbufferData.SysMemPitch = 0;
-    cbufferData.SysMemSlicePitch = 0;
-
-    d3dResources->GetDevice()->CreateBuffer(&cbufferDesc, &cbufferData, m_cbuffer.GetAddressOf());
 }
 
 void Renderer::Render(std::vector<std::shared_ptr<Entity>> entities)
@@ -58,35 +50,4 @@ void Renderer::Render(std::vector<std::shared_ptr<Entity>> entities)
     }
 
     m_d3dResources->GetSwapChain()->Present(1, NULL);
-}
-
-void Renderer::CreateViewAndPerspective()
-{
-    // Use DirectXMath to create view and perspective matrices.
-
-    DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 0.0f, 5.0f, 0.0f);
-    DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
-    DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-    DirectX::XMStoreFloat4x4(
-        &m_externalData.View,
-        DirectX::XMMatrixLookAtRH(
-            eye,
-            at,
-            up
-        )
-    );
-
-    float aspectRatioX = 16.0f / 9.0f;
-    float aspectRatioY = 1.0f;
-
-    DirectX::XMStoreFloat4x4(
-        &m_externalData.Projection,
-        DirectX::XMMatrixPerspectiveFovRH(
-            2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
-            aspectRatioX,
-            0.01f,
-            100.0f
-        )
-    );
 }

@@ -25,11 +25,6 @@ private:
     std::shared_ptr<D3DResources> m_d3dResources;
     AssetManager* m_assetManager;
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_cbuffer;
-    ExternalData m_externalData;
-
     std::shared_ptr<Camera> m_camera;
-
-    void CreateViewAndPerspective();
 };
 
