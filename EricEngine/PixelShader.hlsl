@@ -1,10 +1,10 @@
-struct PsInput
-{
-	float4 position	: SV_POSITION;
-	float4 color	: COLOR0;
-};
+#include "ShaderIncludes.hlsli"
 
-float4 main(PsInput input) : SV_TARGET
+Texture2D		Albedo			: register(t0);
+SamplerState	BasicSampler	: register(s0);
+
+float4 main(VertexToPixel_NormalMap input) : SV_TARGET
 {
-	return input.color;
+	float4 color = Albedo.Sample(BasicSampler, input.uv);
+	return color;
 }

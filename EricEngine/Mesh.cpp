@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-#include "VertexPositionColor.h"
+#include "Vertex.h"
 #include <DirectXMath.h>
 
 using DirectX::XMFLOAT3;
@@ -23,7 +23,7 @@ Mesh Mesh::CreateCube(std::shared_ptr<D3DResources> d3dResources)
     auto device = d3dResources->GetDevice();
 
     // Create geometry
-    VertexPositionColor cubeVertices[] =
+    Vertex cubeVertices[] =
     {
         {XMFLOAT3(-0.5f,-0.5f,-0.5f), XMFLOAT3(  0,  0,  0)},
         {XMFLOAT3(-0.5f,-0.5f, 0.5f), XMFLOAT3(  0,  0,  1)},
@@ -49,7 +49,7 @@ Mesh Mesh::CreateCube(std::shared_ptr<D3DResources> d3dResources)
     hr = device->CreateBuffer(&vDesc, &vData, &vb);
 
     // Create index buffer
-    unsigned short cubeIndices[] =
+    unsigned int cubeIndices[] =
     {
         0,2,1, // -x
         1,2,3,

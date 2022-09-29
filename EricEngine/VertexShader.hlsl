@@ -1,6 +1,9 @@
+#include "ShaderIncludes.hlsli"
+
 cbuffer ExternalData
 {
 	matrix model;
+	matrix modelInvTranspose;
 	matrix view;
 	matrix projection;
 };
@@ -8,20 +11,22 @@ cbuffer ExternalData
 struct VsInput 
 {
 	float3 position	: POSITION;
-	float3 color	: COLOR0;
+	float3 normal	: NORMAL;
+	float3 tangent	: TANGENT;
+	float2 uv		: TEXCOORD;
 };
 
-struct VsOutput
+VertexToPixel_NormalMap main(VsInput input)
 {
-	float4 position	: SV_POSITION;
-	float4 color	: COLOR0;
-};
-
-VsOutput main(VsInput input)
-{
-	VsOutput output;
+	VertexToPixel_NormalMap output;
+	
 	matrix mvp = mul(projection, mul(view, model));
 	output.position = mul(mvp, float4(input.position, 1.0f));
-	output.color = float4(input.color, 1.0f);
+
+	output.normal = mul((float3x3)modelInvTranspose, input.normal);
+	output.tangent = mul((float3x3)modelInvTranspose, input.tangent);
+	
+	output.uv = input.uv;
+
 	return output;
 }

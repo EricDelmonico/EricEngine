@@ -1,5 +1,5 @@
 #include "Renderer.h"
-#include "VertexPositionColor.h"
+#include "Vertex.h"
 
 Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<Camera> camera, AssetManager* assetManager) : m_d3dResources(d3dResources), m_camera(camera), m_assetManager(assetManager)
 {
@@ -32,16 +32,24 @@ void Renderer::Render(std::vector<std::shared_ptr<Entity>> entities)
     vertexShader->SetMatrix4x4("view", m_camera->GetView());
     vertexShader->SetMatrix4x4("projection", m_camera->GetProjection());
 
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockSandstoneSRV = m_assetManager->GetTexture(L"rock_sandstone_albedo.tif");
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState = m_assetManager->GetSamplerState();
+
+    pixelShader->SetShaderResourceView("Albedo", rockSandstoneSRV);
+    pixelShader->SetSamplerState("BasicSamplerState", samplerState);
+    pixelShader->CopyAllBufferData();
+
     // Draw each entity
     for (auto& entity : entities)
     {
         // Set up cbuffer data
         Transform* transform = entity->GetTransform();
         vertexShader->SetMatrix4x4("model", transform->GetWorldMatrix());
+        vertexShader->SetMatrix4x4("modelInvTranspose", transform->GetWorldInverseTransposeMatrix());
         vertexShader->CopyAllBufferData();
 
         auto mesh = entity->GetMesh();
-        UINT stride = sizeof(VertexPositionColor);
+        UINT stride = sizeof(Vertex);
         UINT offset = 0;
         context->IASetVertexBuffers(0, 1, mesh->GetVertexBuffer().GetAddressOf(), &stride, &offset);
         context->IASetIndexBuffer(mesh->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);

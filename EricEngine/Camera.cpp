@@ -46,8 +46,9 @@ void Camera::Update(float dt)
     float speed = movementSpeed * dt;
 
     // Movement
-    if (input.KeyDown('W')) { transform.MoveRelative(0, 0, speed); }
-    if (input.KeyDown('S')) { transform.MoveRelative(0, 0, -speed); }
+    if (input.KeyDown(VK_LSHIFT)) { speed *= 2; }
+    if (input.KeyDown('W')) { transform.MoveRelative(0, 0, -speed); }
+    if (input.KeyDown('S')) { transform.MoveRelative(0, 0, speed); }
     if (input.KeyDown('A')) { transform.MoveRelative(speed, 0, 0); }
     if (input.KeyDown('D')) { transform.MoveRelative(-speed, 0, 0); }
     if (input.KeyDown('E')) { transform.MoveAbsolute(0, speed, 0); }
@@ -57,8 +58,8 @@ void Camera::Update(float dt)
     if (input.MouseLeftDown())
     {
         // Calculate how much the cursor changed
-        float xDiff = dt * -mouseLookSpeed * input.GetMouseXDelta();
-        float yDiff = dt * mouseLookSpeed * input.GetMouseYDelta();
+        float xDiff = dt * mouseLookSpeed * input.GetMouseXDelta();
+        float yDiff = dt * -mouseLookSpeed * input.GetMouseYDelta();
 
         // Don't allow pitch to go more than 90 degrees or less than -90 degrees
         XMFLOAT3 pitchYawRoll = transform.GetPitchYawRoll();
@@ -94,7 +95,7 @@ void Camera::UpdateProjectionMatrix(float aspectRatio)
     XMMATRIX p;
     if (perspective)
     {
-        p = XMMatrixPerspectiveFovRH(
+        p = XMMatrixPerspectiveFovLH(
             fieldOfView,
             aspectRatio,
             0.01f,       // Near clip plane distance
@@ -102,7 +103,7 @@ void Camera::UpdateProjectionMatrix(float aspectRatio)
     }
     else
     {
-        p = XMMatrixOrthographicRH(
+        p = XMMatrixOrthographicLH(
             orthoSize,
             orthoSize,
             0.01f,
