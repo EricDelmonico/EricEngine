@@ -99,7 +99,7 @@ void Camera::UpdateProjectionMatrix(float aspectRatio)
             fieldOfView,
             aspectRatio,
             0.01f,       // Near clip plane distance
-            100.0f);     // Far clip plane distance
+            10000.0f);   // Far clip plane distance
     }
     else
     {

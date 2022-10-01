@@ -51,10 +51,10 @@ void Renderer::Render(std::vector<std::shared_ptr<Entity>> entities)
         auto mesh = entity->GetMesh();
         UINT stride = sizeof(Vertex);
         UINT offset = 0;
-        context->IASetVertexBuffers(0, 1, mesh->GetVertexBuffer().GetAddressOf(), &stride, &offset);
-        context->IASetIndexBuffer(mesh->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
+        context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
+        context->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-        context->DrawIndexed(mesh->GetNumIndices(), 0, 0);
+        context->DrawIndexed(mesh->indices, 0, 0);
     }
 
     m_d3dResources->GetSwapChain()->Present(1, NULL);

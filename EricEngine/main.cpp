@@ -36,16 +36,19 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         0,              // z
         1,              // moveSpeed
         1,              // lookSpeed
-        3.14f / 3.0f,             // FOV
+        3.14f / 3.0f,   // FOV
         16.0f / 9.0f);  // aspectRatio
     std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, camera, assetManager.get());
 
     // Create a basic cube entity
     std::shared_ptr<Mesh> cubeMesh = assetManager->GetMesh("rock_sandstone.obj");
     Transform transform = Transform();
-    std::shared_ptr<Entity> cube = std::make_shared<Entity>(transform, cubeMesh.get());
     std::vector<std::shared_ptr<Entity>> entities;
-    entities.push_back(cube);
+    for (int i = 0; i < 100; i++)
+    {
+        transform.SetPosition((i / 10) * 10, 0, (i % 10) * 10);
+        entities.push_back(std::make_shared<Entity>(transform, cubeMesh.get()));
+    }
 
     MSG msg = { };
     while (msg.message != WM_QUIT)

@@ -173,7 +173,11 @@ std::shared_ptr<Mesh> AssetManager::GetMesh(std::string name)
 
         m_d3dResources->GetDevice()->CreateBuffer(&iDesc, &iData, &ib);
 
-        m_loadedMeshes.insert({ name, std::make_shared<Mesh>(m_d3dResources, vb, ib, numIndices) });
+        m_loadedMeshes.insert({ name, std::make_shared<Mesh>() });
+        auto mesh = m_loadedMeshes[name];
+        mesh->vertexBuffer = vb;
+        mesh->indexBuffer = ib;
+        mesh->indices = numIndices;
         return m_loadedMeshes[name];
     }
 
