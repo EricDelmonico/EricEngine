@@ -43,10 +43,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     // Create a basic cube entity
     std::shared_ptr<Mesh> cubeMesh = assetManager->GetMesh("rock_sandstone.obj");
     Transform transform = Transform();
+    transform.SetScale(0.1f, 0.1f, 0.1f);
     std::vector<std::shared_ptr<Entity>> entities;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 10000; i++)
     {
-        transform.SetPosition((i / 10) * 10, 0, (i % 10) * 10);
+        transform.SetPosition((i / 100) * 1, 0, (i % 100) * 1);
         entities.push_back(std::make_shared<Entity>(transform, cubeMesh.get()));
     }
 

@@ -36,7 +36,7 @@ void Renderer::Render(std::vector<std::shared_ptr<Entity>> entities)
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState = m_assetManager->GetSamplerState();
 
     pixelShader->SetShaderResourceView("Albedo", rockSandstoneSRV);
-    pixelShader->SetSamplerState("BasicSamplerState", samplerState);
+    pixelShader->SetSamplerState("BasicSampler", samplerState);
     pixelShader->CopyAllBufferData();
 
     // Draw each entity
