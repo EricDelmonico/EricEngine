@@ -189,10 +189,8 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AssetManager::GetTexture(std::w
 {
     if (m_loadedTextureSRVs.find(name) != m_loadedTextureSRVs.end()) return m_loadedTextureSRVs[name];
     
-    // Stick srv into our map
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
-
     // Load in the texture file
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     auto hr = CreateWICTextureFromFile(
         m_d3dResources->GetDevice(),
         m_d3dResources->GetContext(),
@@ -203,6 +201,7 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AssetManager::GetTexture(std::w
 
     if (hr == S_OK)
     {
+        // Stick srv into our map
         m_loadedTextureSRVs.insert({ name, srv });
         // Return our texture
         return m_loadedTextureSRVs[name];

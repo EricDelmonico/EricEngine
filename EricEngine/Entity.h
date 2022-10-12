@@ -2,16 +2,20 @@
 #include "Transform.h"
 #include "Mesh.h"
 
-class Entity
+#define MAX_COMPONENTS 15
+#define INVALID_ENTITY 0
+
+// Index in the components array where these components' indices are stored
+#define TRANSFORM 0
+#define MESH 1
+
+struct Entity
 {
-public:
-    Entity(Transform transform, Mesh* mesh);
+    // Array of component map keys, or 0 if this entity does not have the given component
+    UINT32 components[MAX_COMPONENTS];
 
-    Transform* GetTransform() { return &m_transform; }
-    Mesh* GetMesh() { return m_mesh; }
-
-private:
-    Transform m_transform;
-    Mesh* m_mesh;
+    // Index of this object inn the EntityManager.
+    // An ID of 0 indicates a "dead" entity.
+    UINT32 id;
 };
 

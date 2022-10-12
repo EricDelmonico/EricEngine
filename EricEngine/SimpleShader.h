@@ -1,3 +1,9 @@
+// ----------------------------------------------------------------------------
+// SIMPLESHADER CLASS FROM https://github.com/vixorien/SimpleShader
+//
+// Written by Professor Chris Cascioli https://github.com/vixorien
+// ----------------------------------------------------------------------------
+
 #pragma once
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3dcompiler.lib")

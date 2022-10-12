@@ -1,8 +1,16 @@
 #pragma once
 #include <DirectXMath.h>
 
-class Transform
+struct Transform
 {
+    DirectX::XMFLOAT3 position;
+    DirectX::XMFLOAT3 pitchYawRoll;
+    DirectX::XMFLOAT3 scale;
+    DirectX::XMFLOAT4X4 worldMatrix;
+    DirectX::XMFLOAT4X4 worldInverseTransposeMatrix;
+    bool matricesDirty;
+
+// Pre-ECS Transform. Want to keep temporarily for later system implementations
 public:
     Transform();
     ~Transform();
@@ -31,15 +39,6 @@ public:
     void Scale(float x, float y, float z);
 
 private:
-    // Raw transformation data
-    DirectX::XMFLOAT3 position;
-    DirectX::XMFLOAT3 pitchYawRoll;
-    DirectX::XMFLOAT3 scale;
-
-    // Matrices
-    bool matricesDirty;
-    DirectX::XMFLOAT4X4 worldMatrix;
-    DirectX::XMFLOAT4X4 worldInverseTransposeMatrix;
 
     // Helper for updating matrices
     void UpdateMatrices();

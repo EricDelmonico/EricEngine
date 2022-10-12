@@ -5,7 +5,7 @@ Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<C
 {
 }
 
-void Renderer::Render(std::vector<std::shared_ptr<Entity>> entities)
+void Renderer::Render(std::unordered_map<UINT32, Mesh>& meshes)
 {
     auto context = m_d3dResources->GetContext();
 
@@ -40,21 +40,21 @@ void Renderer::Render(std::vector<std::shared_ptr<Entity>> entities)
     pixelShader->CopyAllBufferData();
 
     // Draw each entity
-    for (auto& entity : entities)
+    for (const auto& kvp : meshes)
     {
         // Set up cbuffer data
-        Transform* transform = entity->GetTransform();
-        vertexShader->SetMatrix4x4("model", transform->GetWorldMatrix());
-        vertexShader->SetMatrix4x4("modelInvTranspose", transform->GetWorldInverseTransposeMatrix());
+        Transform transform = {};
+        vertexShader->SetMatrix4x4("model", transform.worldMatrix);
+        vertexShader->SetMatrix4x4("modelInvTranspose", transform.worldInverseTransposeMatrix);
         vertexShader->CopyAllBufferData();
 
-        auto mesh = entity->GetMesh();
+        auto mesh = kvp.second;
         UINT stride = sizeof(Vertex);
         UINT offset = 0;
-        context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
-        context->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+        context->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
+        context->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-        context->DrawIndexed(mesh->indices, 0, 0);
+        context->DrawIndexed(mesh.indices, 0, 0);
     }
 
     m_d3dResources->GetSwapChain()->Present(1, NULL);

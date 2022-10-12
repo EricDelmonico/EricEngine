@@ -9,9 +9,8 @@
 #include "AssetManager.h"
 #include "Renderer.h"
 #include "Input.h"
-#include "Transform.h"
-#include "Entity.h"
 #include "Camera.h"
+#include "EntityManager.h"
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
@@ -40,16 +39,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         16.0f / 9.0f);  // aspectRatio
     std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, camera, assetManager.get());
 
-    // Create a basic cube entity
-    std::shared_ptr<Mesh> cubeMesh = assetManager->GetMesh("rock_sandstone.obj");
-    Transform transform = Transform();
-    transform.SetScale(0.1f, 0.1f, 0.1f);
-    std::vector<std::shared_ptr<Entity>> entities;
-    for (int i = 0; i < 10000; i++)
+    EntityManager* em = &EntityManager::GetInstance();
+
+    ComponentContainer* cc = &ComponentContainer::GetInstance();
+    for (int i = 0; i < 2; i++)
     {
-        transform.SetPosition((i / 100) * 1, 0, (i % 100) * 1);
-        entities.push_back(std::make_shared<Entity>(transform, cubeMesh.get()));
+        Entity* e = em->RegisterNewEntity();
+        Transform transform = {};
+        transform.position = { (i / 100) * 1.0f, 0.0f, (i % 100) * 1.0f };
+        em->AddComponent<Transform>(e->id, transform, TRANSFORM);
+
+        Mesh& mesh = *assetManager->GetMesh("rock_sandstone.obj").get();
+        em->AddComponent<Mesh>(e->id, mesh, MESH);
     }
+
+    em->DeregisterEntity(1);
+
 
     MSG msg = { };
     while (msg.message != WM_QUIT)
@@ -66,11 +71,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
             camera->Update(.004f);
 
-            renderer->Render(entities);
+            renderer->Render(cc->meshes);
 
             Input::GetInstance().EndOfFrame();
         }
     }
+
+    delete em;
+    delete cc;
 
     return 0;
 }

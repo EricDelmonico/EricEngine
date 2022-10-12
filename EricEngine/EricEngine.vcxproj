@@ -129,8 +129,9 @@
   <ItemGroup>
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ComponentContainer.cpp" />
     <ClCompile Include="D3DResources.cpp" />
-    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
@@ -143,8 +144,10 @@
   <ItemGroup>
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ComponentContainer.h" />
     <ClInclude Include="D3DResources.h" />
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="EntityManager.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Mesh.h" />
