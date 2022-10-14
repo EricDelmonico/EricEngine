@@ -23,6 +23,14 @@ AssetManager::AssetManager(std::shared_ptr<D3DResources> d3dResources) : m_d3dRe
     d3dResources->GetDevice()->CreateSamplerState(&samplerDesc, m_basicSamplerState.GetAddressOf());
 }
 
+AssetManager::~AssetManager()
+{
+    for (auto kvp : m_loadedMeshes)
+    {
+        delete kvp.second;
+    }
+}
+
 std::shared_ptr<SimplePixelShader> AssetManager::GetPixelShader(std::wstring name)
 {
     if (m_pixelShaders.find(name) != m_pixelShaders.end()) return m_pixelShaders[name];
@@ -99,7 +107,7 @@ std::string AssetManager::GetExePath()
     return path;
 }
 
-std::shared_ptr<Mesh> AssetManager::GetMesh(std::string name)
+Mesh* AssetManager::GetMesh(std::string name)
 {
     if (m_loadedMeshes.find(name) != m_loadedMeshes.end()) return m_loadedMeshes[name];
 
@@ -173,7 +181,7 @@ std::shared_ptr<Mesh> AssetManager::GetMesh(std::string name)
 
         m_d3dResources->GetDevice()->CreateBuffer(&iDesc, &iData, &ib);
 
-        m_loadedMeshes.insert({ name, std::make_shared<Mesh>() });
+        m_loadedMeshes.insert({ name, new Mesh() });
         auto mesh = m_loadedMeshes[name];
         mesh->vertexBuffer = vb;
         mesh->indexBuffer = ib;

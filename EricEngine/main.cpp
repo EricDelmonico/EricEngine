@@ -2,6 +2,9 @@
 #define UNICODE
 #endif
 
+#include "EntityManager.h"
+#include "Mesh.h"
+#include "Transform.h"
 #include <Windows.h>
 #include "MainWindow.h"
 #include <memory>
@@ -10,9 +13,32 @@
 #include "Renderer.h"
 #include "Input.h"
 #include "Camera.h"
-#include "EntityManager.h"
+
+// Check for memory leaks
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
+using namespace ECS;
+
+HRESULT main(HINSTANCE hInstance, int nCmdShow);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+{
+    HRESULT hr = main(hInstance, nCmdShow);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+#ifdef _DEBUG
+    _CrtDumpMemoryLeaks();
+#endif
+
+    return 0;
+}
+
+HRESULT main(HINSTANCE hInstance, int nCmdShow)
 {
     MainWindow mw(hInstance, 1280, 720, nCmdShow);
 
@@ -21,12 +47,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     hr = mw.InitializeWindow();
     if (FAILED(hr)) return hr;
 
+    // Assign an id to all component types
+    Mesh::id = EntityManager::numComponentTypes++;
+    Transform::id = EntityManager::numComponentTypes++;
+
     // Create and initialize D3D11
     std::shared_ptr<D3DResources> d3dResources = std::make_shared<D3DResources>(1280, 720);
     d3dResources->Initialize(mw.GetWindow());
 
     // Create asset manager
-    std::unique_ptr<AssetManager> assetManager = std::make_unique<AssetManager>(d3dResources);
+    AssetManager* assetManager = new AssetManager(d3dResources);
 
     // Create Camera and renderer
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(
@@ -37,24 +67,26 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         1,              // lookSpeed
         3.14f / 3.0f,   // FOV
         16.0f / 9.0f);  // aspectRatio
-    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, camera, assetManager.get());
+    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, camera, assetManager);
 
     EntityManager* em = &EntityManager::GetInstance();
 
-    ComponentContainer* cc = &ComponentContainer::GetInstance();
-    for (int i = 0; i < 2; i++)
+    std::vector<std::shared_ptr<Transform>> transforms;
+    for (int i = 0; i < 100; i++)
     {
-        Entity* e = em->RegisterNewEntity();
-        Transform transform = {};
-        transform.position = { (i / 100) * 1.0f, 0.0f, (i % 100) * 1.0f };
-        em->AddComponent<Transform>(e->id, transform, TRANSFORM);
-
-        Mesh& mesh = *assetManager->GetMesh("rock_sandstone.obj").get();
-        em->AddComponent<Mesh>(e->id, mesh, MESH);
+        int e = em->RegisterNewEntity();
+        std::shared_ptr<Transform> t = std::make_shared<Transform>();
+        transforms.push_back(t);
+        t->SetPosition((i / 10) * 1.0f, 0.0f, (i % 10) * 1.0f);
+        t->SetScale(0.1f, 0.1f, 0.1f);
+        em->AddComponent<Transform>(e, t.get());
+    
+        Mesh* mesh = assetManager->GetMesh("rock_sandstone.obj");
+        em->AddComponent<Mesh>(e, mesh);
     }
 
+    // Test de-registering an entity
     em->DeregisterEntity(1);
-
 
     MSG msg = { };
     while (msg.message != WM_QUIT)
@@ -65,20 +97,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        else 
+        else
         {
             Input::GetInstance().Update();
 
             camera->Update(.004f);
 
-            renderer->Render(cc->meshes);
+            renderer->Render(em);
 
             Input::GetInstance().EndOfFrame();
         }
     }
 
     delete em;
-    delete cc;
-
-    return 0;
+    delete assetManager;
 }

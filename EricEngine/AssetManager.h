@@ -13,6 +13,7 @@ class AssetManager
 {
 public:
     AssetManager(std::shared_ptr<D3DResources> d3dResources);
+    ~AssetManager();
 
     std::shared_ptr<SimplePixelShader> GetPixelShader(std::wstring name);
     std::shared_ptr<SimpleVertexShader> GetVertexShader(std::wstring name);
@@ -24,7 +25,7 @@ public:
     /// </summary>
     /// <param name="name">The name of the model to load in, including any file extension</param>
     /// <returns>A pointer to the loaded in mesh</returns>
-    std::shared_ptr<Mesh> GetMesh(std::string name);
+    Mesh* GetMesh(std::string name);
 
     /// <summary>
     /// Gets a ShaderResourceView containing the texture named std::string name
@@ -46,7 +47,7 @@ private:
 
     std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> m_loadedTextureSRVs;
 
-    std::unordered_map<std::string, std::shared_ptr<Mesh>> m_loadedMeshes;
+    std::unordered_map<std::string, Mesh*> m_loadedMeshes;
 
     Microsoft::WRL::ComPtr<ID3D11SamplerState> m_basicSamplerState;
 };

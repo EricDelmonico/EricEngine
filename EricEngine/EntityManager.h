@@ -1,127 +1,102 @@
 #pragma once
-#include "Entity.h"
-#include "Transform.h"
-#include "Mesh.h"
-#include "ComponentContainer.h"
+
+// Heavily inspired by EntityFu, written by Nathanael Weiss -- https://github.com/NatWeiss/EntityFu
 
 #include <vector>
+#include <algorithm>
 
-#define MAX_ENTITIES 16384
+#define MAX_ENTITIES 4096
+
+#define INVALID_ENTITY -1
 #define FIRST_VALID_ENTITY INVALID_ENTITY+1
 
-class EntityManager
+#define INVALID_COMPONENT -1
+
+namespace ECS 
 {
-private:
-    static EntityManager* instance;
-
-    ComponentContainer& componentContainer;
-    Entity entities[MAX_ENTITIES];
-    UINT32 nextID;
-    bool outOfRoom;
-
-    // Adds one to nextID, or if we've reached the max amount,
-    // or have hit an already filled slot, advance nextID 
-    // until we find an empty slot
-    void AdvanceNextID()
+    struct Component
     {
-        nextID++;
+        virtual int ID() { return INVALID_COMPONENT; }
+    };
 
-        if (nextID >= MAX_ENTITIES || entities[nextID].id != INVALID_ENTITY)
-        {
-            nextID = INVALID_ENTITY;
-            for (UINT32 i = FIRST_VALID_ENTITY; i < MAX_ENTITIES; i++)
-            {
-                // If we found an empty slot, use it
-                if (entities[i].id == INVALID_ENTITY) nextID = i;
-            }
-
-            // We didn't find an open slot, so we have no room for additional entities.
-            if (nextID == INVALID_ENTITY) outOfRoom = true;
-        }
-    }
-
-    // Initializes this entity manager
-    EntityManager() :
-        componentContainer(ComponentContainer::GetInstance()),
-        nextID(FIRST_VALID_ENTITY),
-        outOfRoom(false),
-        entities()
+    class EntityManager
     {
-    }
+    private:
+        static EntityManager* instance;
 
-public:
-    // ComponentContainer Singleton
-    static EntityManager& GetInstance()
-    {
-        if (!instance) instance = new EntityManager();
-        return *instance;
-    }
+        bool entities[MAX_ENTITIES];
+        // Array of component arrays. Accessed like components[componentID][entityID], so each
+        // component has a contiguous block of memory
+        Component*** components;
 
-    // Clears a spot for a new entity in entities array. Sets the new 
-    // entity's id to its index, then returns a pointer to the Entity.
-    Entity* RegisterNewEntity()
-    {
-        // If we're out of space, don't try to register a new entity
-        if (outOfRoom) return nullptr;
+        // Find an empty id slot to add an entity to.
+        int GetID();
 
-        // Empty out the memory in the new slot
-        UINT32 id = nextID;
-        entities[id] = { };
+        // Initializes this entity manager
+        EntityManager();
 
-        // Assign the ID, then advance the nextID forward
-        entities[id].id = id;
-        AdvanceNextID();
+    public:
+        ~EntityManager();
 
-        return &entities[id];
-    }
+        static int numComponentTypes;
 
-    // Marks a location in the entities array as invalid
-    void DeregisterEntity(UINT32 id)
-    {
-        auto& e = entities[id];
+        // Keep track of where valid components actually are so we
+        // can iterate through them
+        std::vector<int>* componentEntityIDs;
+
+        // ComponentContainer Singleton
+        static EntityManager& GetInstance();
+
+        // Makes a new entity and returns its id
+        int RegisterNewEntity();
+        // Clears out an entity's space
+        void DeregisterEntity(int id);
         
-        // Check each component type to see if it exists, and if it does, remove it
-        // TODO: possibly find a way to not hard code this? Maybe enums?
-        if (e.components[TRANSFORM] != INVALID_COMPONENT) RemoveComponent<Transform>(id, TRANSFORM);
-        if (e.components[MESH] != INVALID_COMPONENT) RemoveComponent<Mesh>(id, MESH);
 
-        // Move our last entity to the newly available slot
-        auto& lastE = entities[nextID - 1];
-        if (lastE.id != INVALID_ENTITY)
-        {
-            // Move the last entity
-            entities[id] = lastE;
-            // Set the now vacant slot to be actually vacant
-            entities[nextID - 1].id = INVALID_ENTITY;
-            // Set id to the new index
-            entities[id].id = id;
-        }
+        // Adds component of type ComponentType to the entity. componentID is used
+        // to stick the component into the entity structs components array
+        template <class ComponentType>
+        void AddComponent(int id, ComponentType* component);
 
-        // Something was removed
-        nextID--;
+        // Removes component of type ComponentType from the entity with the given entityID
+        template <class ComponentType>
+        void RemoveComponent(int entityID);
 
-        outOfRoom = false;
-    }
+        template <class ComponentType>
+        ComponentType* GetComponent(int entityID);
+    };
 
-    // Adds component of type T to the entity. componentID is used
-    // to stick the component into the entity structs components array
-    template <typename T>
-    void AddComponent(UINT32 id, T& component, UINT8 componentID)
+    template<class ComponentType>
+    inline void EntityManager::AddComponent(int id, ComponentType* component)
     {
         // Can't add a component to an invalid entity
-        assert(entities[id].id != INVALID_ENTITY);
+        if (!entities[id]) return;
 
-        auto& entity = entities[id];
-        entity.components[componentID] = componentContainer.AddComponent<T>(component);
+        int componentID = component->ID();
+        components[componentID][id] = component;
 
-        assert(entity.components[componentID] != INVALID_COMPONENT);
+        // We've added a component here, need to keep track of it
+        auto& entityIDs = componentEntityIDs[componentID];
+        entityIDs.push_back(id);
+        std::sort(entityIDs.begin(), entityIDs.end());
     }
-
-    // Removes component of type T from the entity with the given entityID
-    template <typename T>
-    void RemoveComponent(UINT32 entityID, UINT8 componentID)
+    template<class ComponentType>
+    inline void EntityManager::RemoveComponent(int entityID)
     {
-        componentContainer.RemoveComponent<T>(entities[entityID].components[componentID]);
-        entities[entityID].components[componentID] = INVALID_COMPONENT;
+        int componentID = ComponentType::ID();
+        // Set to an empty component, will have an ID of INVALID_COMPONENT which is useful
+        delete components[componentID][entityID];
+        components[componentID][entityID] = nullptr;
+
+        auto& entitiesVec = componentEntityIDs[componentID];
+        auto it = std::find(entitiesVec.begin(), entitiesVec.end(), entityID);
+        if (it != entitiesVec.end())
+            entitiesVec.erase(it);
     }
-};
+    template<class ComponentType>
+    inline ComponentType* EntityManager::GetComponent(int entityID)
+    {
+        int componentID = ComponentType::id;
+        return static_cast<ComponentType*>(components[componentID][entityID]);
+    }
+}

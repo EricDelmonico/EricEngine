@@ -1,11 +1,13 @@
 #include "Renderer.h"
 #include "Vertex.h"
+#include <algorithm>
+#include <iterator>
 
 Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<Camera> camera, AssetManager* assetManager) : m_d3dResources(d3dResources), m_camera(camera), m_assetManager(assetManager)
 {
 }
 
-void Renderer::Render(std::unordered_map<UINT32, Mesh>& meshes)
+void Renderer::Render(ECS::EntityManager* em)
 {
     auto context = m_d3dResources->GetContext();
 
@@ -40,21 +42,26 @@ void Renderer::Render(std::unordered_map<UINT32, Mesh>& meshes)
     pixelShader->CopyAllBufferData();
 
     // Draw each entity
-    for (const auto& kvp : meshes)
+    // We need both a mesh and a transform
+    std::vector<int> meshTransformIDs;
+    auto& meshEntityIDs = em->componentEntityIDs[Mesh::id];
+    auto& transformEntityIDs = em->componentEntityIDs[Transform::id];
+    std::set_intersection(meshEntityIDs.begin(), meshEntityIDs.end(), transformEntityIDs.begin(), transformEntityIDs.end(), std::back_inserter(meshTransformIDs));
+    for (auto& i : meshTransformIDs)
     {
         // Set up cbuffer data
-        Transform transform = {};
-        vertexShader->SetMatrix4x4("model", transform.worldMatrix);
-        vertexShader->SetMatrix4x4("modelInvTranspose", transform.worldInverseTransposeMatrix);
+        Transform* transform = em->GetComponent<Transform>(i);
+        vertexShader->SetMatrix4x4("model", transform->GetWorldMatrix());
+        vertexShader->SetMatrix4x4("modelInvTranspose", transform->GetWorldInverseTransposeMatrix());
         vertexShader->CopyAllBufferData();
 
-        auto mesh = kvp.second;
+        Mesh* mesh = em->GetComponent<Mesh>(i);
         UINT stride = sizeof(Vertex);
         UINT offset = 0;
-        context->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
-        context->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+        context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
+        context->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-        context->DrawIndexed(mesh.indices, 0, 0);
+        context->DrawIndexed(mesh->indices, 0, 0);
     }
 
     m_d3dResources->GetSwapChain()->Present(1, NULL);

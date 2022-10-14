@@ -1,5 +1,7 @@
 #include "Mesh.h"
 
+int Mesh::id;
+
 //#include "Vertex.h"
 //#include <DirectXMath.h>
 //

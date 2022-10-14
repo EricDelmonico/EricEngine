@@ -1,7 +1,8 @@
 #pragma once
 #include <DirectXMath.h>
+#include "EntityManager.h"
 
-struct Transform
+struct Transform : ECS::Component
 {
     DirectX::XMFLOAT3 position;
     DirectX::XMFLOAT3 pitchYawRoll;
@@ -37,6 +38,12 @@ public:
     void MoveRelative(float x, float y, float z);
     void Rotate(float pitch, float yaw, float roll);
     void Scale(float x, float y, float z);
+
+    static int id;
+    virtual int ID()
+    {
+        return id;
+    }
 
 private:
 

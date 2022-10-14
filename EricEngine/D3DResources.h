@@ -12,6 +12,7 @@ class D3DResources
 {
 public:
     D3DResources(int width, int height);
+    ~D3DResources();
     HRESULT Initialize(HWND hWnd);
 
     ID3D11Device* GetDevice() { return m_device.Get(); }

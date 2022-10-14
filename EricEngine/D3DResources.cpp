@@ -5,6 +5,10 @@ D3DResources::D3DResources(int width, int height) : m_width(width), m_height(hei
 {
 }
 
+D3DResources::~D3DResources()
+{
+}
+
 HRESULT D3DResources::Initialize(HWND hWnd)
 {
     HRESULT hr = 0;

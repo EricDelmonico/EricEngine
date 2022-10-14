@@ -1,6 +1,9 @@
 #include "Transform.h"
 
 using namespace DirectX;
+
+int Transform::id;
+
 Transform::Transform()
 {
     position = XMFLOAT3(0, 0, 0);
