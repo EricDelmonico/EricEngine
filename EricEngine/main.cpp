@@ -81,12 +81,12 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     rockMaterial->normals = assetManager->GetTexture(L"tripleshotgun_Normals.jpg");
     rockMaterial->roughness = assetManager->GetTexture(L"tripleshotgun_Roughness.jpg");
     rockMaterial->samplerState = assetManager->GetSamplerState();
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 3969; i++)
     {
         int e = em->RegisterNewEntity();
         std::shared_ptr<Transform> t = std::make_shared<Transform>();
         transforms.push_back(t);
-        t->SetPosition((i / 10) * 1.0f, 0.0f, (i % 10) * 1.0f);
+        t->SetPosition((i / 63) * 1.0f, 0.0f, (i % 63) * 1.0f);
         t->SetScale(0.25f, 0.25f, 0.25f);
         em->AddComponent<Transform>(e, t.get());
     
