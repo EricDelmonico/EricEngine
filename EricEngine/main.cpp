@@ -13,6 +13,7 @@
 #include "Renderer.h"
 #include "Input.h"
 #include "Camera.h"
+#include "Material.h"
 
 // Check for memory leaks
 #define _CRTDBG_MAP_ALLOC
@@ -50,6 +51,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     // Assign an id to all component types
     Mesh::id = EntityManager::numComponentTypes++;
     Transform::id = EntityManager::numComponentTypes++;
+    Material::id = EntityManager::numComponentTypes++;
 
     // Create and initialize D3D11
     std::shared_ptr<D3DResources> d3dResources = std::make_shared<D3DResources>(1280, 720);
@@ -72,17 +74,26 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     EntityManager* em = &EntityManager::GetInstance();
 
     std::vector<std::shared_ptr<Transform>> transforms;
+    std::shared_ptr<Material> rockMaterial;
+    rockMaterial = std::make_shared<Material>();
+    rockMaterial->albedo = assetManager->GetTexture(L"tripleshotgun_albedo.jpg");
+    rockMaterial->metalness = assetManager->GetTexture(L"tripleshotgun_Metallic.jpg");
+    rockMaterial->normals = assetManager->GetTexture(L"tripleshotgun_Normals.jpg");
+    rockMaterial->roughness = assetManager->GetTexture(L"tripleshotgun_Roughness.jpg");
+    rockMaterial->samplerState = assetManager->GetSamplerState();
     for (int i = 0; i < 100; i++)
     {
         int e = em->RegisterNewEntity();
         std::shared_ptr<Transform> t = std::make_shared<Transform>();
         transforms.push_back(t);
         t->SetPosition((i / 10) * 1.0f, 0.0f, (i % 10) * 1.0f);
-        t->SetScale(0.1f, 0.1f, 0.1f);
+        t->SetScale(0.25f, 0.25f, 0.25f);
         em->AddComponent<Transform>(e, t.get());
     
-        Mesh* mesh = assetManager->GetMesh("rock_sandstone.obj");
+        Mesh* mesh = assetManager->GetMesh("Triple_Barrel_Shotgun.obj");
         em->AddComponent<Mesh>(e, mesh);
+
+        em->AddComponent<Material>(e, rockMaterial.get());
     }
 
     // Test de-registering an entity

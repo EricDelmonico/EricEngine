@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "Vertex.h"
+#include "Material.h"
 #include <algorithm>
 #include <iterator>
 
@@ -34,21 +35,20 @@ void Renderer::Render(ECS::EntityManager* em)
     vertexShader->SetMatrix4x4("view", m_camera->GetView());
     vertexShader->SetMatrix4x4("projection", m_camera->GetProjection());
 
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockSandstoneSRV = m_assetManager->GetTexture(L"rock_sandstone_albedo.tif");
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState = m_assetManager->GetSamplerState();
-
-    pixelShader->SetShaderResourceView("Albedo", rockSandstoneSRV);
-    pixelShader->SetSamplerState("BasicSampler", samplerState);
-    pixelShader->CopyAllBufferData();
-
     // Draw each entity
     // We need both a mesh and a transform
-    std::vector<int> meshTransformIDs;
-    auto& meshEntityIDs = em->componentEntityIDs[Mesh::id];
-    auto& transformEntityIDs = em->componentEntityIDs[Transform::id];
-    std::set_intersection(meshEntityIDs.begin(), meshEntityIDs.end(), transformEntityIDs.begin(), transformEntityIDs.end(), std::back_inserter(meshTransformIDs));
+    std::vector<int> meshTransformIDs = em->GetEntitiesWithComponents<Mesh, Transform, Material>();
+    
     for (auto& i : meshTransformIDs)
     {
+        Material* material = em->GetComponent<Material>(i);
+        pixelShader->SetShaderResourceView("Albedo", material->albedo);
+        pixelShader->SetShaderResourceView("Normals", material->normals);
+        pixelShader->SetShaderResourceView("Metalness", material->metalness);
+        pixelShader->SetShaderResourceView("Roughness", material->roughness);
+        pixelShader->SetSamplerState("BasicSampler", material->samplerState);
+        pixelShader->CopyAllBufferData();
+
         // Set up cbuffer data
         Transform* transform = em->GetComponent<Transform>(i);
         vertexShader->SetMatrix4x4("model", transform->GetWorldMatrix());

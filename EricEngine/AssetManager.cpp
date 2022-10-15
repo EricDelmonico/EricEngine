@@ -119,7 +119,8 @@ Mesh* AssetManager::GetMesh(std::string name)
         aiProcess_Triangulate           |
         aiProcess_JoinIdenticalVertices |
         aiProcess_ConvertToLeftHanded   |
-        aiProcess_CalcTangentSpace);
+        aiProcess_CalcTangentSpace      |
+        aiProcess_PreTransformVertices);
 
     // We don't have a scene, we don't have a mesh
     if (!scene) return nullptr;
