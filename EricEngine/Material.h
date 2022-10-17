@@ -3,6 +3,7 @@
 #include "EntityManager.h"
 #include <d3d11.h>
 #include <wrl/client.h>
+#include "SimpleShader.h"
 
 struct Material : ECS::Component
 {
@@ -10,7 +11,11 @@ struct Material : ECS::Component
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normals;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> metalness;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughness;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ao;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+
+    SimplePixelShader* pixelShader;
+    SimpleVertexShader* vertexShader;
 
     static int id;
     virtual int ID()

@@ -46,7 +46,7 @@ HRESULT MainWindow::InitializeWindow()
     // Create the window
     m_hWnd = CreateWindow(
         CLASS_NAME,          // Window class name
-        L"SilentEngine",     // Window text
+        L"EricEngine",     // Window text
         WS_OVERLAPPEDWINDOW, // Window style (WS_OVERLAPPEDWINDOW gives a title bar, a border, a system menu, and minimize/maximize buttons)
         CW_USEDEFAULT,       // X position
         CW_USEDEFAULT,       // Y position
