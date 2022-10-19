@@ -110,7 +110,6 @@ HRESULT D3DResources::Initialize(HWND hWnd)
 
     // Create depth-stencil buffer and view
     {
-
         CD3D11_TEXTURE2D_DESC desc(
             DXGI_FORMAT_D24_UNORM_S8_UINT,
             bbDesc.Width,

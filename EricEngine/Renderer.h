@@ -17,9 +17,9 @@
 class Renderer
 {
 public:
-    Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<Camera> camera, AssetManager* assetManager);
+    Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<Camera> camera);
 
-    void Render(ECS::EntityManager* em);
+    void Render();
 
 private:
     std::shared_ptr<D3DResources> m_d3dResources;

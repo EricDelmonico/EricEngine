@@ -4,12 +4,14 @@
 #include <algorithm>
 #include <iterator>
 
-Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<Camera> camera, AssetManager* assetManager) : m_d3dResources(d3dResources), m_camera(camera), m_assetManager(assetManager)
+Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<Camera> camera) : m_d3dResources(d3dResources), m_camera(camera)
 {
 }
 
-void Renderer::Render(ECS::EntityManager* em)
+void Renderer::Render()
 {
+    auto& em = ECS::EntityManager::GetInstance();
+
     auto context = m_d3dResources->GetContext();
 
     auto renderTarget = m_d3dResources->GetRenderTarget();
@@ -25,11 +27,11 @@ void Renderer::Render(ECS::EntityManager* em)
 
     // Draw each entity
     // We need a mesh, a transform, and a material
-    std::vector<int> meshTransformIDs = em->GetEntitiesWithComponents<Mesh, Transform, Material>();
+    std::vector<int> meshTransformIDs = em.GetEntitiesWithComponents<Mesh, Transform, Material>();
     
     for (auto& i : meshTransformIDs)
     {
-        Material* material = em->GetComponent<Material>(i);
+        Material* material = em.GetComponent<Material>(i);
         auto pixelShader = material->pixelShader;
         pixelShader->SetShader();
         pixelShader->SetShaderResourceView("Albedo", material->albedo);
@@ -42,7 +44,7 @@ void Renderer::Render(ECS::EntityManager* em)
         pixelShader->CopyAllBufferData();
 
         // Set up cbuffer data
-        Transform* transform = em->GetComponent<Transform>(i);
+        Transform* transform = em.GetComponent<Transform>(i);
         auto vertexShader = material->vertexShader;
         vertexShader->SetShader();
         vertexShader->SetMatrix4x4("view", m_camera->GetView());
@@ -51,7 +53,7 @@ void Renderer::Render(ECS::EntityManager* em)
         vertexShader->SetMatrix4x4("modelInvTranspose", transform->GetWorldInverseTransposeMatrix());
         vertexShader->CopyAllBufferData();
 
-        Mesh* mesh = em->GetComponent<Mesh>(i);
+        Mesh* mesh = em.GetComponent<Mesh>(i);
         UINT stride = sizeof(Vertex);
         UINT offset = 0;
         context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);

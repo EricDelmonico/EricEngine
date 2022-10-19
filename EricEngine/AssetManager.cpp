@@ -123,7 +123,7 @@ Mesh* AssetManager::GetMesh(std::string name)
         aiProcess_PreTransformVertices);
 
     // We don't have a scene, we don't have a mesh
-    if (!scene) return nullptr;
+    assert(scene);
 
     if (scene->HasMeshes())
     {
@@ -218,6 +218,6 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AssetManager::GetTexture(std::w
     else 
     {
         // Texture failed to load :(
-        return nullptr;
+        throw;
     }
 }

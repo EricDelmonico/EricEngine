@@ -69,7 +69,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
         1,              // lookSpeed
         3.14f / 3.0f,   // FOV
         16.0f / 9.0f);  // aspectRatio
-    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, camera, assetManager);
+    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, camera);
 
     EntityManager* em = &EntityManager::GetInstance();
 
@@ -77,10 +77,10 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     std::shared_ptr<Material> cameraMaterial;
     cameraMaterial = std::make_shared<Material>();
     cameraMaterial->albedo = assetManager->GetTexture(L"1cam_albedo.png");
-    cameraMaterial->metalness = assetManager->GetTexture(L"1cam_metallness.png");
+    cameraMaterial->metalness = assetManager->GetTexture(L"1cam_metalness.png");
     cameraMaterial->normals = assetManager->GetTexture(L"1cam_normals.png");
     cameraMaterial->roughness = assetManager->GetTexture(L"1cam_roughness.png");
-    cameraMaterial->ao = assetManager->GetTexture(L"bronze_metal.png");
+    cameraMaterial->ao = assetManager->GetTexture(L"white_roughness.png");
     cameraMaterial->samplerState = assetManager->GetSamplerState();
     cameraMaterial->pixelShader = assetManager->GetPixelShader(L"PixelShader").get();
     cameraMaterial->vertexShader = assetManager->GetVertexShader(L"VertexShader").get();
@@ -99,7 +99,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     std::shared_ptr<Material> tableMaterial;
     tableMaterial = std::make_shared<Material>();
     tableMaterial->albedo = assetManager->GetTexture(L"table_albedo.png");
-    tableMaterial->metalness = assetManager->GetTexture(L"table_metallness.png");
+    tableMaterial->metalness = assetManager->GetTexture(L"table_metalness.png");
     tableMaterial->normals = assetManager->GetTexture(L"table_normals.png");
     tableMaterial->roughness = assetManager->GetTexture(L"table_roughness.png");
     tableMaterial->ao = assetManager->GetTexture(L"table_ao.png");
@@ -201,7 +201,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
 
             camera->Update(.004f);
 
-            renderer->Render(em);
+            renderer->Render();
 
             Input::GetInstance().EndOfFrame();
         }
