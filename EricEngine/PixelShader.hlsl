@@ -5,6 +5,9 @@
 cbuffer ExternalData
 {
 	float3 camPosition;
+	float3 sunColor;
+	float3 sunDir;
+	float sunIntensity;
 };
 
 Texture2D		Albedo			: register(t0);
@@ -26,7 +29,7 @@ float4 main(VertexToPixel_NormalMap input) : SV_TARGET
 	float3 unpackedNormal = Normals.Sample(BasicSampler, input.uv).rgb * 2.0f - 1.0f;
 	input.normal = mul(unpackedNormal, TBN);
 
-	float3 L = normalize(float3(0.0, 1.0, -1.0));
+	float3 L = normalize(-sunDir);
 
 	float3 albedo = Albedo.Sample(BasicSampler, input.uv).rgb;
 	albedo = pow(albedo, 2.2f); // Reverse gamma correct
@@ -53,8 +56,7 @@ float4 main(VertexToPixel_NormalMap input) : SV_TARGET
 	kD *= 1.0 - metallic;
 
 	float NdotL = max(dot(N, L), 0.0);
-	float3 lightColor = float3(1.0, 1.0, 1.0);
-	float3 light = (kD * albedo / PI + specular) * lightColor * NdotL * 2.0;
+	float3 light = (kD * albedo / PI + specular) * sunColor * NdotL * sunIntensity;
 
 	float ao = AO.Sample(BasicSampler, input.uv).r;
 	float3 ambient = float3(0.1, 0.1, 0.1) * albedo * ao;

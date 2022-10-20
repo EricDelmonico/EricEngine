@@ -1,10 +1,13 @@
 #pragma once
 #include <DirectXMath.h>
 #include "Transform.h"
+#include "EntityManager.h"
 
-class Camera
+struct Camera : ECS::Component
 {
 public:
+    Camera();
+
     Camera(
         float x,
         float y,
@@ -36,6 +39,12 @@ public:
 
     float GetOrthoSize();
     void SetOrthoSize(float size);
+
+    static int id;
+    virtual int ID()
+    {
+        return id;
+    }
 
 private:
 

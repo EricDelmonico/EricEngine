@@ -4,6 +4,12 @@
 
 using namespace DirectX;
 
+int Camera::id;
+
+Camera::Camera()
+{
+}
+
 Camera::Camera(
     float x,
     float y,

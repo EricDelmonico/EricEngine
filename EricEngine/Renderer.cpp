@@ -1,10 +1,11 @@
 #include "Renderer.h"
 #include "Vertex.h"
 #include "Material.h"
+#include "Light.h"
 #include <algorithm>
 #include <iterator>
 
-Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources, std::shared_ptr<Camera> camera) : m_d3dResources(d3dResources), m_camera(camera)
+Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources) : m_d3dResources(d3dResources)
 {
 }
 
@@ -29,6 +30,14 @@ void Renderer::Render()
     // We need a mesh, a transform, and a material
     std::vector<int> meshTransformIDs = em.GetEntitiesWithComponents<Mesh, Transform, Material>();
     
+    // Get our camera for rendering
+    int cameraIndex = em.GetEntitiesWithComponents<Camera>()[0];
+    Camera* camera = em.GetComponent<Camera>(cameraIndex);
+
+    // Grab our light(s)
+    int lightIndex = em.GetEntitiesWithComponents<Light>()[0];
+    Light* light = em.GetComponent<Light>(lightIndex);
+
     for (auto& i : meshTransformIDs)
     {
         Material* material = em.GetComponent<Material>(i);
@@ -40,15 +49,18 @@ void Renderer::Render()
         pixelShader->SetShaderResourceView("Roughness", material->roughness);
         pixelShader->SetShaderResourceView("AO", material->ao);
         pixelShader->SetSamplerState("BasicSampler", material->samplerState);
-        pixelShader->SetFloat3("camPosition", m_camera->GetTransform()->GetPosition());
+        pixelShader->SetFloat3("camPosition", camera->GetTransform()->GetPosition());
+        pixelShader->SetFloat3("sunDir", light->dir);
+        pixelShader->SetFloat3("sunColor", light->color);
+        pixelShader->SetFloat("sunIntensity", light->intensity);
         pixelShader->CopyAllBufferData();
 
         // Set up cbuffer data
         Transform* transform = em.GetComponent<Transform>(i);
         auto vertexShader = material->vertexShader;
         vertexShader->SetShader();
-        vertexShader->SetMatrix4x4("view", m_camera->GetView());
-        vertexShader->SetMatrix4x4("projection", m_camera->GetProjection());
+        vertexShader->SetMatrix4x4("view", camera->GetView());
+        vertexShader->SetMatrix4x4("projection", camera->GetProjection());
         vertexShader->SetMatrix4x4("model", transform->GetWorldMatrix());
         vertexShader->SetMatrix4x4("modelInvTranspose", transform->GetWorldInverseTransposeMatrix());
         vertexShader->CopyAllBufferData();

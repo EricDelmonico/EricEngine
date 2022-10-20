@@ -134,7 +134,7 @@ namespace ECS
         boost::mp11::tuple_for_each(types, [&](const auto& type) {
             Component* comp = static_cast<Component*>((void*)(&type));
             int id = comp->ID();
-            assert(id != INVALID_COMPONENT);
+            assert(id != INVALID_COMPONENT); // Type MUST be a component
             vectorsToIntersect.push_back(&componentEntityIDs[id]);
         });
 

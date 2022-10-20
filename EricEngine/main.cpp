@@ -14,6 +14,7 @@
 #include "Input.h"
 #include "Camera.h"
 #include "Material.h"
+#include "Light.h"
 
 // Check for memory leaks
 #define _CRTDBG_MAP_ALLOC
@@ -52,6 +53,8 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     Mesh::id = EntityManager::numComponentTypes++;
     Transform::id = EntityManager::numComponentTypes++;
     Material::id = EntityManager::numComponentTypes++;
+    Camera::id = EntityManager::numComponentTypes++;
+    Light::id = EntityManager::numComponentTypes++;
 
     // Create and initialize D3D11
     std::shared_ptr<D3DResources> d3dResources = std::make_shared<D3DResources>(1280, 720);
@@ -69,7 +72,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
         1,              // lookSpeed
         3.14f / 3.0f,   // FOV
         16.0f / 9.0f);  // aspectRatio
-    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, camera);
+    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources);
 
     EntityManager* em = &EntityManager::GetInstance();
 
@@ -107,7 +110,23 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     tableMaterial->pixelShader = assetManager->GetPixelShader(L"PixelShader").get();
     tableMaterial->vertexShader = assetManager->GetVertexShader(L"VertexShader").get();
 
-    // Add camera
+    // Add render camera
+    {
+        int e = em->RegisterNewEntity();
+        em->AddComponent(e, camera.get());
+    }
+
+    // Add directional light
+    std::shared_ptr<Light> light = std::make_shared<Light>();
+    light->color = { 1, 1, 1 };
+    light->dir = { 0, -1, 1 };
+    light->intensity = 2.0f;
+    {
+        int e = em->RegisterNewEntity();
+        em->AddComponent(e, light.get());
+    }
+
+    // Add camera model
     {
         int e = em->RegisterNewEntity();
         std::shared_ptr<Transform> t = std::make_shared<Transform>();
