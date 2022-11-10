@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <memory>
 
 #include "Mesh.h"
 #include "Transform.h"
@@ -28,7 +29,7 @@ private:
     ECS::Component* ReadComponent(std::ifstream& in, int componentID);
 
     template <class ComponentType>
-    ComponentType* ReadComponent(std::ifstream& in);
+    std::shared_ptr<ComponentType> ReadComponent(std::ifstream& in);
 
     // WString methods adapted from
     // https://stackoverflow.com/questions/23399931/c-reading-string-from-binary-file-using-fstream
@@ -73,7 +74,7 @@ public:
     void SaveScene(std::string name);
     void LoadScene(std::string name);
 
-    std::vector<ECS::Component*> loadedComponents;
+    std::vector<std::shared_ptr<ECS::Component>> loadedComponents;
 };
 
 template<typename ComponentType>
@@ -115,10 +116,9 @@ inline void SceneLoader::WriteComponent<Material>(Material* material, std::ofstr
 }
 
 template <class ComponentType>
-ComponentType* SceneLoader::ReadComponent(std::ifstream& in)
+std::shared_ptr<ComponentType> SceneLoader::ReadComponent(std::ifstream& in)
 {
-    int componentSize = sizeof(ComponentType);
-    ComponentType* component = new ComponentType();
-    in.read((char*)(component), componentSize);
+    std::shared_ptr<ComponentType> component = std::make_shared<ComponentType>();
+    in.read((char*)(component.get()), sizeof(ComponentType));
     return component;
 }

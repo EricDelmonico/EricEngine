@@ -7,6 +7,7 @@ SceneLoader::SceneLoader(AssetManager* am) : am(am)
 
 SceneLoader::~SceneLoader()
 {
+    DeleteLoadedComponents();
 }
 
 void SceneLoader::SaveScene(std::string name)
@@ -84,9 +85,6 @@ void SceneLoader::LoadScene(std::string name)
             // Read in the component itself
             ECS::Component* component = ReadComponent(in, componentID);
 
-            // Keep track of that newly read in component
-            loadedComponents.push_back(component);
-
             // Add the component to its entity
             em->AddComponent(componentID, e, component);
         }
@@ -97,12 +95,6 @@ void SceneLoader::LoadScene(std::string name)
 
 void SceneLoader::DeleteLoadedComponents()
 {
-    // Delete the component memory then clear the vector
-    for (int i = 0; i < loadedComponents.size(); i++)
-    {
-        delete loadedComponents[i];
-        loadedComponents[i] = nullptr;
-    }
     loadedComponents.clear();
 }
 
@@ -117,12 +109,14 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
 
     if (componentID == Transform::id)
     {
-        return ReadComponent<Transform>(in);
+        auto transform = ReadComponent<Transform>(in);
+        loadedComponents.push_back(transform);
+        return transform.get();
     }
 
     if (componentID == Material::id)
     {
-        Material* material = new Material();
+        std::shared_ptr<Material> material = std::make_shared<Material>();
         material->albedoName = ReadWString(in);
         material->normalsName = ReadWString(in);
         material->metalnessName = ReadWString(in);
@@ -142,17 +136,22 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
 
         material->samplerState = am->GetSamplerState();
 
-        return material;
+        loadedComponents.push_back(material);
+        return material.get();
     }
 
     if (componentID == Camera::id)
     {
-        return ReadComponent<Camera>(in);
+        auto cam = ReadComponent<Camera>(in);
+        loadedComponents.push_back(cam);
+        return cam.get();
     }
 
     if (componentID == Light::id)
     {
-        return ReadComponent<Light>(in);
+        auto light = ReadComponent<Light>(in);
+        loadedComponents.push_back(light);
+        return light.get();
     }
 
     throw;
