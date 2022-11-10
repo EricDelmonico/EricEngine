@@ -46,6 +46,11 @@ public:
         return id;
     }
 
+    virtual int Size()
+    {
+        return sizeof(Camera);
+    }
+
 private:
 
     // Camera matrices

@@ -3,6 +3,7 @@
 // Heavily inspired by EntityFu, written by Nathanael Weiss -- https://github.com/NatWeiss/EntityFu
 
 #include <vector>
+#include <unordered_map>
 #include <algorithm>
 #include <tuple>
 #include <iterator>
@@ -21,22 +22,23 @@ namespace ECS
     struct Component
     {
         virtual int ID() { return INVALID_COMPONENT; }
+        virtual int Size() { throw; }
     };
 
     class EntityManager
     {
     private:
         std::vector<std::vector<int>*> vectorsToIntersect;
+        static std::unordered_map<int, int> componentTypeSizes;
 
         static EntityManager* instance;
 
-        bool entities[MAX_ENTITIES];
+        // Find an empty id slot to add an entity to.
+        int GetID();
+
         // Array of component arrays. Accessed like components[componentID][entityID], so each
         // component has a contiguous block of memory
         Component*** components;
-
-        // Find an empty id slot to add an entity to.
-        int GetID();
 
         // Initializes this entity manager
         EntityManager();
@@ -45,6 +47,9 @@ namespace ECS
         ~EntityManager();
 
         static int numComponentTypes;
+
+        bool entities[MAX_ENTITIES];
+        int entityCount;
 
         // Keep track of where valid components actually are so we
         // can iterate through them
@@ -58,11 +63,15 @@ namespace ECS
         // Clears out an entity's space
         void DeregisterEntity(int id);
 
+        int GetComponentSizeFromID(int componentID);
 
         // Adds component of type ComponentType to the entity. componentID is used
         // to stick the component into the entity structs components array
         template <class ComponentType>
         void AddComponent(int id, ComponentType* component);
+
+        // Adds a component by id
+        void AddComponent(int componentID, int entityID, Component* component);
 
         // Removes component of type ComponentType from the entity with the given entityID
         template <class ComponentType>
@@ -73,21 +82,15 @@ namespace ECS
 
         template <class... ComponentTypes>
         std::vector<int> GetEntitiesWithComponents();
+
+        template <class ComponentType>
+        static void RegisterNewComponentType();
     };
 
     template<class ComponentType>
     inline void EntityManager::AddComponent(int id, ComponentType* component)
     {
-        // Can't add a component to an invalid entity
-        if (!entities[id]) return;
-
-        int componentID = component->ID();
-        components[componentID][id] = component;
-
-        // We've added a component here, need to keep track of it
-        auto& entityIDs = componentEntityIDs[componentID];
-        entityIDs.push_back(id);
-        std::sort(entityIDs.begin(), entityIDs.end());
+        AddComponent(ComponentType::id, id, component);
     }
     template<class ComponentType>
     inline void EntityManager::RemoveComponent(int entityID)
@@ -149,5 +152,12 @@ namespace ECS
         
 
         return prevVec;
+    }
+
+    template <class ComponentType>
+    static inline void EntityManager::RegisterNewComponentType()
+    {
+        ComponentType::id = numComponentTypes++;
+        componentTypeSizes.insert({ ComponentType::id, sizeof(ComponentType) });
     }
 }

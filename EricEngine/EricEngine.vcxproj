@@ -138,6 +138,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="SceneLoader.cpp" />
     <ClCompile Include="SimpleShader.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="SceneLoader.h" />
     <ClInclude Include="SimpleShader.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Vertex.h" />

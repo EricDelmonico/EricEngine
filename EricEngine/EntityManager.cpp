@@ -3,6 +3,7 @@
 using namespace ECS;
 
 EntityManager* EntityManager::instance;
+std::unordered_map<int, int> EntityManager::componentTypeSizes;
 int EntityManager::numComponentTypes;
 
 int ECS::EntityManager::GetID()
@@ -26,6 +27,8 @@ int ECS::EntityManager::GetID()
 
 ECS::EntityManager::EntityManager() : entities()
 {
+    entityCount = 0;
+
     // Allocate component memory
     // Each component has a full array,
     // where every entity has one slot
@@ -34,6 +37,10 @@ ECS::EntityManager::EntityManager() : entities()
     for (int i = 0; i < max; i++)
     {
         components[i] = new Component*[MAX_ENTITIES];
+        for (int j = 0; j < MAX_ENTITIES; j++)
+        {
+            components[i][j] = {};
+        }
     }
 
     // Allocate space for index vectors
@@ -62,6 +69,7 @@ int ECS::EntityManager::RegisterNewEntity()
 {
     int id = GetID();
     entities[id] = true;
+    entityCount++;
     return id;
 }
 
@@ -82,4 +90,26 @@ void ECS::EntityManager::DeregisterEntity(int id)
         }
         components[i][id] = nullptr;
     }
+
+    entityCount--;
+}
+
+int ECS::EntityManager::GetComponentSizeFromID(int componentID)
+{
+    if (componentID < 0 || componentID >= numComponentTypes) throw;
+
+    return componentTypeSizes[componentID];
+}
+
+void ECS::EntityManager::AddComponent(int componentID, int entityID, Component* component)
+{
+    // Only add components to existing entities
+    if (!entities[entityID]) return;
+
+    components[componentID][entityID] = component;
+
+    // We've added a component here, need to keep track of it
+    auto& entityIDs = componentEntityIDs[componentID];
+    entityIDs.push_back(entityID);
+    std::sort(entityIDs.begin(), entityIDs.end());
 }

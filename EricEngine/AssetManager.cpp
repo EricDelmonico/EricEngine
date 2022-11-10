@@ -10,6 +10,8 @@
 #pragma comment(lib, "d3d11.lib")
 #include "WICTextureLoader.h"
 
+#include "boost/exception/all.hpp"
+
 AssetManager::AssetManager(std::shared_ptr<D3DResources> d3dResources) : m_d3dResources(d3dResources)
 {
     // Sampler description/sampler state
@@ -148,9 +150,19 @@ Mesh* AssetManager::GetMesh(std::string name)
         // float3 Tangent
         // float2 UV
         std::vector<Vertex> vertices;
+        DirectX::XMFLOAT3 max = dxPositions[0];
+        DirectX::XMFLOAT3 min = dxPositions[0];
         for (int i = 0; i < assimpMesh->mNumVertices; i++)
         {
             vertices.push_back({ dxPositions[i], dxNormals[i], dxTangents[i], DirectX::XMFLOAT2(dxUVs[i].x, dxUVs[i].y) });
+            
+            if (dxPositions[i].x > max.x) max.x = dxPositions[i].x;
+            if (dxPositions[i].y > max.y) max.y = dxPositions[i].y;
+            if (dxPositions[i].z > max.z) max.z = dxPositions[i].z;
+
+            if (dxPositions[i].x < min.x) min.x = dxPositions[i].x;
+            if (dxPositions[i].y < min.y) min.y = dxPositions[i].y;
+            if (dxPositions[i].z < min.z) min.z = dxPositions[i].z;
         }
 
         // Set up vertex buffer
@@ -187,11 +199,15 @@ Mesh* AssetManager::GetMesh(std::string name)
         mesh->vertexBuffer = vb;
         mesh->indexBuffer = ib;
         mesh->indices = numIndices;
+        mesh->boundingMax = max;
+        mesh->boundingMin = min;
+        mesh->name = name;
         return m_loadedMeshes[name];
     }
 
     // If we got here, we did not have a mesh
-    return nullptr;
+    std::string errorMessage = "Failed to load model " + name;
+    throw std::exception(errorMessage.c_str());
 }
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AssetManager::GetTexture(std::wstring name)
