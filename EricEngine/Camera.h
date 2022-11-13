@@ -21,6 +21,14 @@ public:
         float pitch = 0,
         float yaw = 0,
         float roll = 0);
+    Camera(
+        Transform transform, 
+        float moveSpeed, 
+        float lookSpeed, 
+        float fov, 
+        float aspectRatio, 
+        bool perspective, 
+        float orthoSize);
     ~Camera();
 
     // Update methods
@@ -39,6 +47,11 @@ public:
 
     float GetOrthoSize();
     void SetOrthoSize(float size);
+
+    float GetMoveSpeed() { return movementSpeed; }
+    float GetLookSpeed() { return mouseLookSpeed; }
+    bool IsPerspective() { return perspective; }
+    float GetAspectRatio() { return aspectRatio; }
 
     static int id;
     virtual int ID()

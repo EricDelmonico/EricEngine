@@ -71,10 +71,16 @@ public:
 	bool MouseMiddlePress();
 	bool MouseMiddleRelease();
 
+	void SetGuiKeyboardCapture(bool capture) { guiWantsKeyboard = capture; }
+	void SetGuiMouseCapture(bool capture) { guiWantsMouse = capture; }
+
 private:
 	// Arrays for the current and previous key states
 	unsigned char* kbState{ 0 };
 	unsigned char* prevKbState{ 0 };
+
+	bool guiWantsKeyboard = false;
+	bool guiWantsMouse = false;
 
 	// Mouse position and wheel data
 	int mouseX{ 0 };

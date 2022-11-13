@@ -1,6 +1,12 @@
 #include "MainWindow.h"
 #include "Input.h"
 
+#ifdef _DEBUG
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_dx11.h"
+#include "ImGui/imgui_impl_win32.h"
+#endif
+
 MainWindow* MainWindow::MainWindowInstance = nullptr;
 
 MainWindow::MainWindow(HINSTANCE hInstance, int width, int height, int showCmd) :
@@ -79,6 +85,12 @@ LRESULT MainWindow::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 {
     switch (uMsg)
     {
+    case WM_CHAR:
+    {
+        ImGui::GetIO().AddInputCharacter((char)wParam);
+        return 0;
+    }
+
     case WM_CLOSE:
     {
         HMENU hMenu;

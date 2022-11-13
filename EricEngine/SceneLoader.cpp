@@ -55,7 +55,11 @@ void SceneLoader::SaveScene(std::string name)
 
 void SceneLoader::LoadScene(std::string name)
 {
-    if (loadedComponents.size() > 0) DeleteLoadedComponents();
+    em->DeregisterAllEntities();
+    if (loadedComponents.size() > 0)
+    {
+        DeleteLoadedComponents();
+    }
 
     std::ifstream in;
     in.open(GetExePath() + "../../Levels/" + name, std::ios::binary | std::ios::in);
@@ -95,6 +99,10 @@ void SceneLoader::LoadScene(std::string name)
 
 void SceneLoader::DeleteLoadedComponents()
 {
+    for (auto& c : loadedComponents)
+    {
+        delete c;
+    }
     loadedComponents.clear();
 }
 
@@ -109,14 +117,20 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
 
     if (componentID == Transform::id)
     {
-        auto transform = ReadComponent<Transform>(in);
+        Transform* transform = new Transform();
+        in.read((char*)(&transform->position), sizeof(DirectX::XMFLOAT3));
+        in.read((char*)(&transform->pitchYawRoll), sizeof(DirectX::XMFLOAT3));
+        in.read((char*)(&transform->scale), sizeof(DirectX::XMFLOAT3));
+        in.read((char*)(&transform->worldMatrix), sizeof(DirectX::XMFLOAT4X4));
+        in.read((char*)(&transform->worldInverseTransposeMatrix), sizeof(DirectX::XMFLOAT4X4));
+        in.read((char*)(&transform->matricesDirty), sizeof(bool));
         loadedComponents.push_back(transform);
-        return transform.get();
+        return transform;
     }
 
     if (componentID == Material::id)
     {
-        std::shared_ptr<Material> material = std::make_shared<Material>();
+        Material* material = new Material();
         material->albedoName = ReadWString(in);
         material->normalsName = ReadWString(in);
         material->metalnessName = ReadWString(in);
@@ -137,21 +151,44 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
         material->samplerState = am->GetSamplerState();
 
         loadedComponents.push_back(material);
-        return material.get();
+        return material;
     }
 
     if (componentID == Camera::id)
     {
-        auto cam = ReadComponent<Camera>(in);
+        float floatParams[11];
+        bool perspective;
+
+        for (int i = 0; i < 11; i++)
+        {
+            in.read((char*)(&(floatParams[i])), sizeof(float));
+        }
+        in.read((char*)(&perspective), sizeof(bool));
+        auto cam = new Camera(
+            floatParams[0],
+            floatParams[1],
+            floatParams[2],
+            floatParams[3],
+            floatParams[4],
+            floatParams[5],
+            floatParams[6],
+            floatParams[7],
+            perspective,
+            floatParams[8],
+            floatParams[9],
+            floatParams[10]);
         loadedComponents.push_back(cam);
-        return cam.get();
+        return cam;
     }
 
     if (componentID == Light::id)
     {
-        auto light = ReadComponent<Light>(in);
+        Light* light = new Light();
+        in.read((char*)(&light->dir), sizeof(DirectX::XMFLOAT3));
+        in.read((char*)(&light->color), sizeof(DirectX::XMFLOAT3));
+        in.read((char*)(&light->intensity), sizeof(float));
         loadedComponents.push_back(light);
-        return light.get();
+        return light;
     }
 
     throw;

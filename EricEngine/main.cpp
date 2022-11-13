@@ -17,12 +17,94 @@
 #include "Light.h"
 #include "SceneLoader.h"
 
+#include <chrono>
+
+// ImGui
+#ifdef _DEBUG
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_dx11.h"
+#include "ImGui/imgui_impl_win32.h"
+#endif
+
 // Check for memory leaks
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 
+#include <boost/algorithm/string.hpp>
+
+const int WIDTH = 1600;
+const int HEIGHT = 900;
+
 using namespace ECS;
+
+#ifdef _DEBUG
+void InitializeImGui(void* hwnd, ID3D11Device* device, ID3D11DeviceContext* context)
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+
+    ImGui::StyleColorsClassic();
+
+    ImGui_ImplWin32_Init(hwnd);
+    ImGui_ImplDX11_Init(device, context);
+}
+
+void UpdateImGui(SceneLoader* sceneLoader, float deltaTime)
+{
+    auto& input = Input::GetInstance();
+
+    // Take care of input
+    ImGuiIO& io = ImGui::GetIO();
+    io.DeltaTime = deltaTime;
+    io.DisplaySize.x = WIDTH;
+    io.DisplaySize.y = HEIGHT;
+    io.KeyCtrl = input.KeyDown(VK_CONTROL);
+    io.KeyShift = input.KeyDown(VK_SHIFT);
+    io.KeyAlt = input.KeyDown(VK_MENU);
+    io.MousePos.x = (float)input.GetMouseX();
+    io.MousePos.y = (float)input.GetMouseY();
+    io.MouseDown[0] = input.MouseLeftDown();
+    io.MouseDown[1] = input.MouseRightDown();
+    io.MouseDown[2] = input.MouseMiddleDown();
+    io.MouseWheel = input.GetMouseWheel();
+    input.GetKeyArray(io.KeysDown, 256);
+
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
+    input.SetGuiKeyboardCapture(io.WantCaptureKeyboard);
+    input.SetGuiMouseCapture(io.WantCaptureMouse);
+
+    ImGui::Begin("SceneLoader");
+
+    char sceneName[128] = "Empty.scene";
+    std::string sceneStr = sceneName;
+    if (ImGui::InputText("Scene Name", sceneName, 128))
+    {
+        boost::trim_right(sceneStr);
+        sceneStr = sceneName;
+    }
+
+    if (ImGui::Button("Save Scene"))
+    {
+        sceneLoader->SaveScene(sceneStr);
+    }
+
+    if (Input::GetInstance().KeyDown(VK_CONTROL) && Input::GetInstance().KeyPress('S'))
+    {
+        sceneLoader->SaveScene(sceneStr);
+    }
+
+    if (ImGui::Button("Load Scene"))
+    {
+        sceneLoader->LoadScene(sceneStr);
+    }
+
+    ImGui::End();
+}
+#endif
 
 HRESULT main(HINSTANCE hInstance, int nCmdShow);
 
@@ -43,7 +125,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 HRESULT main(HINSTANCE hInstance, int nCmdShow)
 {
-    MainWindow mw(hInstance, 1600, 900, nCmdShow);
+    MainWindow mw(hInstance, WIDTH, HEIGHT, nCmdShow);
 
     // Create and initialize window
     HRESULT hr = S_OK;
@@ -58,8 +140,12 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     EntityManager::RegisterNewComponentType<Light>();
 
     // Create and initialize D3D11
-    std::shared_ptr<D3DResources> d3dResources = std::make_shared<D3DResources>(1280, 720);
+    std::shared_ptr<D3DResources> d3dResources = std::make_shared<D3DResources>(WIDTH, HEIGHT);
     d3dResources->Initialize(mw.GetWindow());
+
+#ifdef _DEBUG
+    InitializeImGui(mw.GetWindow(), d3dResources->GetDevice(), d3dResources->GetContext());
+#endif
 
     // Create asset manager
     AssetManager* assetManager = new AssetManager(d3dResources);
@@ -86,7 +172,8 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
         em->AddComponent(e, camera.get());
     }
 
-    sceneLoader->LoadScene("Test.scene");
+    auto prevFrameTime = std::chrono::high_resolution_clock::now();
+    auto thisFrameTime = prevFrameTime;
 
     MSG msg = { };
     while (msg.message != WM_QUIT)
@@ -99,18 +186,35 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
         }
         else
         {
+            thisFrameTime = std::chrono::high_resolution_clock::now();
+            float dt = (float)std::chrono::duration_cast<std::chrono::microseconds>(thisFrameTime - prevFrameTime).count() / 1000000.0f;
+
+            Input::GetInstance().SetGuiKeyboardCapture(false);
+            Input::GetInstance().SetGuiMouseCapture(false);
+
+#ifdef _DEBUG
+            UpdateImGui(sceneLoader, dt);
+#endif
+
             Input::GetInstance().Update();
 
-            if (Input::GetInstance().KeyPress('U')) sceneLoader->SaveScene("Test2.scene");
-            if (Input::GetInstance().KeyPress('P')) sceneLoader->LoadScene("Test2.scene");
-
-            camera->Update(.004f);
+            auto camEntities = em->GetEntitiesWithComponents<Camera>();
+            em->GetComponent<Camera>(camEntities[0])->Update(dt);
 
             renderer->Render();
 
             Input::GetInstance().EndOfFrame();
+
+            prevFrameTime = thisFrameTime;
         }
     }
+
+#ifdef _DEBUG
+    // ImGui clean up
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+#endif
 
     delete em;
     delete assetManager;

@@ -39,6 +39,26 @@ Camera::Camera(
     UpdateProjectionMatrix(aspectRatio);
 }
 
+Camera::Camera(
+    Transform transform, 
+    float moveSpeed, 
+    float lookSpeed, 
+    float fov, 
+    float aspectRatio, 
+    bool perspective, 
+    float orthoSize) :
+    transform(transform),
+    movementSpeed(moveSpeed),
+    mouseLookSpeed(lookSpeed),
+    fieldOfView(fov),
+    aspectRatio(aspectRatio),
+    perspective(perspective),
+    orthoSize(orthoSize)
+{
+    UpdateViewMatrix();
+    UpdateProjectionMatrix(aspectRatio);
+}
+
 Camera::~Camera()
 {
 }

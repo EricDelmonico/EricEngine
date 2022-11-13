@@ -38,7 +38,7 @@ namespace ECS
 
         // Array of component arrays. Accessed like components[componentID][entityID], so each
         // component has a contiguous block of memory
-        Component*** components;
+        std::vector<std::vector<Component*>> components;
 
         // Initializes this entity manager
         EntityManager();
@@ -62,6 +62,9 @@ namespace ECS
         int RegisterNewEntity();
         // Clears out an entity's space
         void DeregisterEntity(int id);
+
+        // Clears out all entities
+        void DeregisterAllEntities();
 
         int GetComponentSizeFromID(int componentID);
 
@@ -109,7 +112,7 @@ namespace ECS
     inline ComponentType* EntityManager::GetComponent(int entityID)
     {
         int componentID = ComponentType::id;
-        return static_cast<ComponentType*>(components[componentID][entityID]);
+        return (ComponentType*)(components[componentID][entityID]);
     }
     template<class... ComponentTypes>
     inline std::vector<int> EntityManager::GetEntitiesWithComponents()

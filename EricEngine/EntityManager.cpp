@@ -32,11 +32,11 @@ ECS::EntityManager::EntityManager() : entities()
     // Allocate component memory
     // Each component has a full array,
     // where every entity has one slot
-    components = new Component**[EntityManager::numComponentTypes];
+    components.resize(numComponentTypes);
     int max = EntityManager::numComponentTypes;
     for (int i = 0; i < max; i++)
     {
-        components[i] = new Component*[MAX_ENTITIES];
+        components[i].resize(MAX_ENTITIES);
         for (int j = 0; j < MAX_ENTITIES; j++)
         {
             components[i][j] = {};
@@ -49,13 +49,6 @@ ECS::EntityManager::EntityManager() : entities()
 
 ECS::EntityManager::~EntityManager()
 {
-    // Deallocate component arrays
-    for (int i = 0; i < EntityManager::numComponentTypes; i++)
-    {
-        delete[] components[i];
-    }
-    delete[] components;
-
     delete[] componentEntityIDs;
 }
 
@@ -79,9 +72,10 @@ void ECS::EntityManager::DeregisterEntity(int id)
     // Clear out any valid components
     for (int i = 0; i < EntityManager::numComponentTypes; i++)
     {
-        if (components[i][id] == nullptr) continue;
+        auto component = components[i][id];
+        if (component == nullptr) continue;
 
-        if (components[i][id]->ID() != INVALID_COMPONENT)
+        if (component->ID() != INVALID_COMPONENT)
         {
             auto& entitiesVec = componentEntityIDs[i];
             auto it = std::find(entitiesVec.begin(), entitiesVec.end(), id);
@@ -92,6 +86,15 @@ void ECS::EntityManager::DeregisterEntity(int id)
     }
 
     entityCount--;
+}
+
+void ECS::EntityManager::DeregisterAllEntities()
+{
+    for (int i = 0; i < MAX_ENTITIES; i++) 
+    {
+        // Deregister each entity that exists
+        if (entities[i]) DeregisterEntity(i);
+    }
 }
 
 int ECS::EntityManager::GetComponentSizeFromID(int componentID)
