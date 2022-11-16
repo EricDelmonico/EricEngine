@@ -29,7 +29,7 @@ public:
         float aspectRatio, 
         bool perspective, 
         float orthoSize);
-    ~Camera();
+    virtual ~Camera();
 
     // Update methods
     void Update(float dt);

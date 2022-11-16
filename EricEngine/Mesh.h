@@ -27,6 +27,8 @@ struct Mesh : ECS::Component
     {
     }
 
+    virtual ~Mesh() {}
+
     static int id;
     virtual int ID()
     {

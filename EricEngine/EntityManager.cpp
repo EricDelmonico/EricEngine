@@ -39,7 +39,7 @@ ECS::EntityManager::EntityManager() : entities()
         components[i].resize(MAX_ENTITIES);
         for (int j = 0; j < MAX_ENTITIES; j++)
         {
-            components[i][j] = {};
+            components[i][j] = new Component();
         }
     }
 
@@ -49,7 +49,16 @@ ECS::EntityManager::EntityManager() : entities()
 
 ECS::EntityManager::~EntityManager()
 {
+    DeregisterAllEntities();
+
     delete[] componentEntityIDs;
+    for (int cid = 0; cid < numComponentTypes; cid++)
+    {
+        for (int eid = 0; eid < MAX_ENTITIES; eid++)
+        {
+            delete components[cid][eid];
+        }
+    }
 }
 
 EntityManager& ECS::EntityManager::GetInstance()
@@ -81,8 +90,10 @@ void ECS::EntityManager::DeregisterEntity(int id)
             auto it = std::find(entitiesVec.begin(), entitiesVec.end(), id);
             if (it != entitiesVec.end())
                 entitiesVec.erase(it);
+            // Get rid of the old component... EntityManager
+            // does not manage component lifetime so do not delete
+            components[i][id] = new Component();
         }
-        components[i][id] = nullptr;
     }
 
     entityCount--;
@@ -108,6 +119,9 @@ void ECS::EntityManager::AddComponent(int componentID, int entityID, Component* 
 {
     // Only add components to existing entities
     if (!entities[entityID]) return;
+
+    // Delete empty component
+    delete components[componentID][entityID];
 
     components[componentID][entityID] = component;
 

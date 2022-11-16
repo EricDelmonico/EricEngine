@@ -23,6 +23,7 @@ namespace ECS
     {
         virtual int ID() { return INVALID_COMPONENT; }
         virtual int Size() { throw; }
+        virtual ~Component() {}
     };
 
     class EntityManager

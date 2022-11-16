@@ -9,6 +9,8 @@ struct Light : ECS::Component
     DirectX::XMFLOAT3 color;
     float intensity;
 
+    virtual ~Light() {}
+
     static int id;
     virtual int ID()
     {

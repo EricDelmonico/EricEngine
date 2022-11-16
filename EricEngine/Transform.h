@@ -14,7 +14,7 @@ struct Transform : ECS::Component
 // Pre-ECS Transform. Want to keep temporarily for later system implementations
 public:
     Transform();
-    ~Transform();
+    virtual ~Transform();
 
     // Getters
     DirectX::XMFLOAT3 GetUp();

@@ -5,9 +5,7 @@
 #include "EntityManager.h"
 #include "Mesh.h"
 #include "Transform.h"
-#include <Windows.h>
 #include "MainWindow.h"
-#include <memory>
 #include "D3DResources.h"
 #include "AssetManager.h"
 #include "Renderer.h"
@@ -17,6 +15,8 @@
 #include "Light.h"
 #include "SceneLoader.h"
 
+#include <Windows.h>
+#include <memory>
 #include <chrono>
 
 // ImGui
@@ -110,11 +110,11 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
-    HRESULT hr = main(hInstance, nCmdShow);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
+   HRESULT hr = main(hInstance, nCmdShow);
+   if (FAILED(hr))
+   {
+       return hr;
+   }
 
 #ifdef _DEBUG
     _CrtDumpMemoryLeaks();

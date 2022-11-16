@@ -85,11 +85,13 @@ LRESULT MainWindow::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 {
     switch (uMsg)
     {
+#ifdef _DEBUG
     case WM_CHAR:
     {
         ImGui::GetIO().AddInputCharacter((char)wParam);
         return 0;
     }
+#endif
 
     case WM_CLOSE:
     {

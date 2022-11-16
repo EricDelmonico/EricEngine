@@ -27,6 +27,7 @@ struct Material : ECS::Component
     SimplePixelShader* pixelShader;
     SimpleVertexShader* vertexShader;
 
+    virtual ~Material() {}
 
     static int id;
     virtual int ID()
