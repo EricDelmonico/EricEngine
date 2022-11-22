@@ -14,6 +14,7 @@
 #include "Material.h"
 #include "Light.h"
 #include "SceneLoader.h"
+#include "SceneEditor.h"
 
 #include <Windows.h>
 #include <memory>
@@ -133,6 +134,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     if (FAILED(hr)) return hr;
 
     // Assign an id to all component types
+    // Mesh needs to be registered first......  would like to find a better solution
     EntityManager::RegisterNewComponentType<Mesh>();
     EntityManager::RegisterNewComponentType<Transform>();
     EntityManager::RegisterNewComponentType<Material>();
@@ -153,12 +155,17 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     // Create scene loader
     SceneLoader* sceneLoader = new SceneLoader(assetManager);
 
+#if _DEBUG
+    // Create scene editor
+    SceneEditor sceneEditor(sceneLoader, assetManager);
+#endif
+
     // Create Camera and renderer
-    std::shared_ptr<Camera> camera = std::make_shared<Camera>(
+    Camera* camera = new Camera(
         0,              // x
-        20,              // y
-        30,              // z
-        10,              // moveSpeed
+        20,             // y
+        30,             // z
+        10,             // moveSpeed
         1,              // lookSpeed
         3.14f / 3.0f,   // FOV
         16.0f / 9.0f);  // aspectRatio
@@ -169,7 +176,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     // Add render camera
     {
         int e = em->RegisterNewEntity();
-        em->AddComponent(e, camera.get());
+        em->AddComponent(e, camera);
     }
 
     auto prevFrameTime = std::chrono::high_resolution_clock::now();
@@ -200,6 +207,10 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
 
             auto camEntities = em->GetEntitiesWithComponents<Camera>();
             em->GetComponent<Camera>(camEntities[0])->Update(dt);
+
+#if _DEBUG
+            sceneEditor.Update(dt);
+#endif
 
             renderer->Render();
 

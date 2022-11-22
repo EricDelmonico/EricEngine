@@ -44,19 +44,18 @@ ECS::EntityManager::EntityManager() : entities()
     }
 
     // Allocate space for index vectors
-    componentEntityIDs = new std::vector<int>[EntityManager::numComponentTypes];
+    componentEntityIDs.resize(EntityManager::numComponentTypes);
 }
 
 ECS::EntityManager::~EntityManager()
 {
     DeregisterAllEntities();
 
-    delete[] componentEntityIDs;
     for (int cid = 0; cid < numComponentTypes; cid++)
     {
         for (int eid = 0; eid < MAX_ENTITIES; eid++)
         {
-            delete components[cid][eid];
+            if (components[cid][eid]->ID() != MESH_ID) delete components[cid][eid];
         }
     }
 }
@@ -90,8 +89,7 @@ void ECS::EntityManager::DeregisterEntity(int id)
             auto it = std::find(entitiesVec.begin(), entitiesVec.end(), id);
             if (it != entitiesVec.end())
                 entitiesVec.erase(it);
-            // Get rid of the old component... EntityManager
-            // does not manage component lifetime so do not delete
+            if (components[i][id]->ID() != MESH_ID) delete components[i][id];
             components[i][id] = new Component();
         }
     }
@@ -119,9 +117,11 @@ void ECS::EntityManager::AddComponent(int componentID, int entityID, Component* 
 {
     // Only add components to existing entities
     if (!entities[entityID]) return;
+    // Don't allow double adding of components
+    if (components[componentID][entityID]->ID() != INVALID_COMPONENT) return;
 
     // Delete empty component
-    delete components[componentID][entityID];
+    if (components[componentID][entityID]->ID() != MESH_ID) delete components[componentID][entityID];
 
     components[componentID][entityID] = component;
 
@@ -129,4 +129,10 @@ void ECS::EntityManager::AddComponent(int componentID, int entityID, Component* 
     auto& entityIDs = componentEntityIDs[componentID];
     entityIDs.push_back(entityID);
     std::sort(entityIDs.begin(), entityIDs.end());
+}
+
+bool ECS::EntityManager::EntityHasComponent(int componentID, int entityID)
+{
+    // If this is not true, there is no component there
+    return components[componentID][entityID]->ID() == componentID;
 }

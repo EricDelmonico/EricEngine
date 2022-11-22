@@ -17,6 +17,8 @@
 
 #define INVALID_COMPONENT -1
 
+#define MESH_ID 0
+
 namespace ECS
 {
     struct Component
@@ -54,7 +56,7 @@ namespace ECS
 
         // Keep track of where valid components actually are so we
         // can iterate through them
-        std::vector<int>* componentEntityIDs;
+        std::vector<std::vector<int>> componentEntityIDs;
 
         // ComponentContainer Singleton
         static EntityManager& GetInstance();
@@ -89,6 +91,8 @@ namespace ECS
 
         template <class ComponentType>
         static void RegisterNewComponentType();
+
+        bool EntityHasComponent(int componentID, int entityID);
     };
 
     template<class ComponentType>
@@ -99,10 +103,12 @@ namespace ECS
     template<class ComponentType>
     inline void EntityManager::RemoveComponent(int entityID)
     {
-        int componentID = ComponentType::ID();
+        int componentID = ComponentType::id;
+        // There's not a component here
+        if (components[componentID][entityID]->ID() == INVALID_COMPONENT) return;
         // Set to an empty component, will have an ID of INVALID_COMPONENT which is useful
-        delete components[componentID][entityID];
-        components[componentID][entityID] = nullptr;
+        if (components[componentID][entityID]->ID() != MESH_ID) delete components[componentID][entityID];
+        components[componentID][entityID] = new Component();
 
         auto& entitiesVec = componentEntityIDs[componentID];
         auto it = std::find(entitiesVec.begin(), entitiesVec.end(), entityID);
@@ -125,7 +131,7 @@ namespace ECS
         if (tupleSize < 2)
         {
             // Get all entities with the component passed in, if one was passed in
-            if (tupleSize == 1)
+            if (tupleSize == 1 && componentEntityIDs[std::get<0>(types).ID()].size() > 0)
             {
                 return componentEntityIDs[std::get<0>(types).ID()];
             }
@@ -145,7 +151,7 @@ namespace ECS
             vectorsToIntersect.push_back(&componentEntityIDs[id]);
         });
 
-        std::vector<int>& prevVec = *vectorsToIntersect[0];
+        std::vector<int> prevVec = *vectorsToIntersect[0];
         for (int i = 1; i < vectorsToIntersect.size(); i++)
         {
             std::vector<int>& nextVec = *vectorsToIntersect[i];

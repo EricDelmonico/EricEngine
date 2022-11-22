@@ -5,11 +5,6 @@ SceneLoader::SceneLoader(AssetManager* am) : am(am)
     this->em = &ECS::EntityManager::GetInstance();
 }
 
-SceneLoader::~SceneLoader()
-{
-    DeleteLoadedComponents();
-}
-
 void SceneLoader::SaveScene(std::string name)
 {
     // Grab the array of entities for convenience
@@ -56,10 +51,6 @@ void SceneLoader::SaveScene(std::string name)
 void SceneLoader::LoadScene(std::string name)
 {
     em->DeregisterAllEntities();
-    if (loadedComponents.size() > 0)
-    {
-        DeleteLoadedComponents();
-    }
 
     std::ifstream in;
     in.open(GetExePath() + "../../Levels/" + name, std::ios::binary | std::ios::in);
@@ -97,15 +88,6 @@ void SceneLoader::LoadScene(std::string name)
     in.close();
 }
 
-void SceneLoader::DeleteLoadedComponents()
-{
-    for (auto& c : loadedComponents)
-    {
-        delete c;
-    }
-    loadedComponents.clear();
-}
-
 ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
 {
     // Handle any special cases
@@ -124,7 +106,6 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
         in.read((char*)(&transform->worldMatrix), sizeof(DirectX::XMFLOAT4X4));
         in.read((char*)(&transform->worldInverseTransposeMatrix), sizeof(DirectX::XMFLOAT4X4));
         in.read((char*)(&transform->matricesDirty), sizeof(bool));
-        loadedComponents.push_back(transform);
         return transform;
     }
 
@@ -150,7 +131,6 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
 
         material->samplerState = am->GetSamplerState();
 
-        loadedComponents.push_back(material);
         return material;
     }
 
@@ -177,7 +157,6 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
             floatParams[8],
             floatParams[9],
             floatParams[10]);
-        loadedComponents.push_back(cam);
         return cam;
     }
 
@@ -187,7 +166,6 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
         in.read((char*)(&light->dir), sizeof(DirectX::XMFLOAT3));
         in.read((char*)(&light->color), sizeof(DirectX::XMFLOAT3));
         in.read((char*)(&light->intensity), sizeof(float));
-        loadedComponents.push_back(light);
         return light;
     }
 

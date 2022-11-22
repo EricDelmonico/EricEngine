@@ -21,8 +21,6 @@ private:
     ECS::EntityManager* em;
     AssetManager* am;
 
-    void DeleteLoadedComponents();
-
     template <typename ComponentType>
     void WriteComponent(ComponentType* component, std::ofstream& os);
 
@@ -66,12 +64,9 @@ private:
 
 public:
     SceneLoader(AssetManager* am);
-    ~SceneLoader();
 
     void SaveScene(std::string name);
     void LoadScene(std::string name);
-
-    std::vector<ECS::Component*> loadedComponents;
 };
 
 template<typename ComponentType>
