@@ -15,14 +15,14 @@ struct Material : ECS::Component
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ao;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 
-    std::wstring albedoName;
-    std::wstring normalsName;
-    std::wstring metalnessName;
-    std::wstring roughnessName;
-    std::wstring aoName;
+    std::string albedoName;
+    std::string normalsName;
+    std::string metalnessName;
+    std::string roughnessName;
+    std::string aoName;
 
-    std::wstring pixelShaderName;
-    std::wstring vertexShaderName;
+    std::string pixelShaderName;
+    std::string vertexShaderName;
 
     SimplePixelShader* pixelShader;
     SimpleVertexShader* vertexShader;

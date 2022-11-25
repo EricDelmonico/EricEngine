@@ -51,7 +51,7 @@ void InitializeImGui(void* hwnd, ID3D11Device* device, ID3D11DeviceContext* cont
     ImGui_ImplDX11_Init(device, context);
 }
 
-void UpdateImGui(SceneLoader* sceneLoader, float deltaTime)
+void UpdateImGui(SceneLoader* sceneLoader, char* sceneName, float deltaTime)
 {
     auto& input = Input::GetInstance();
 
@@ -80,12 +80,11 @@ void UpdateImGui(SceneLoader* sceneLoader, float deltaTime)
 
     ImGui::Begin("SceneLoader");
 
-    char sceneName[128] = "Empty.scene";
     std::string sceneStr = sceneName;
     if (ImGui::InputText("Scene Name", sceneName, 128))
     {
-        boost::trim_right(sceneStr);
         sceneStr = sceneName;
+        boost::trim_right(sceneStr);
     }
 
     if (ImGui::Button("Save Scene"))
@@ -182,6 +181,10 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     auto prevFrameTime = std::chrono::high_resolution_clock::now();
     auto thisFrameTime = prevFrameTime;
 
+#ifdef _DEBUG
+    char sceneName[128] = "Empty.scene";
+#endif
+
     MSG msg = { };
     while (msg.message != WM_QUIT)
     {
@@ -200,7 +203,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
             Input::GetInstance().SetGuiMouseCapture(false);
 
 #ifdef _DEBUG
-            UpdateImGui(sceneLoader, dt);
+            UpdateImGui(sceneLoader, sceneName, dt);
 #endif
 
             Input::GetInstance().Update();

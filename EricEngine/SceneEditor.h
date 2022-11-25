@@ -11,6 +11,9 @@ public:
     SceneEditor(SceneLoader* sceneLoader, AssetManager* assetManager);
 
     void Update(float dt);
+    bool DisplayMeshDropdown();
+    bool DisplayTextureDropdown(std::string dropdownName, std::string* dataString);
+    void ReplaceMaterial(int entity, Material* newMat);
 
 private:
     SceneLoader* sceneLoader;
@@ -20,11 +23,11 @@ private:
 
     char meshName[32] = "cube.obj";
 
-    char albedoName[32] = "black_roughness.png";
-    char normalsName[32] = "black_roughness.png";
-    char metalnessName[32] = "black_roughness.png";
-    char roughnessName[32] = "black_roughness.png";
-    char aoName[32] = "white_roughness.png";
+    std::string albedoName = "black_roughness.png";
+    std::string normalsName = "black_roughness.png";
+    std::string metalnessName = "black_roughness.png";
+    std::string roughnessName = "black_roughness.png";
+    std::string aoName = "white_roughness.png";
     char pixelShaderName[32] = "PixelShader";
     char vertexShaderName[32] = "VertexShader";
 
@@ -36,10 +39,10 @@ private:
     DirectX::XMFLOAT3 color = { 0, 0, 0 };
     float intensity;
 
+    std::string selectedTexture = "black_roughness.png";
+    std::string selectedMesh = "cube.obj";
+
     void SelectedEntityUI();
     void DisplayEntityComponents(int e);
-
-    std::string WStringToString(std::wstring wstr);
-    std::wstring StringToWString(std::string str);
 };
 

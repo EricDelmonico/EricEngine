@@ -14,6 +14,7 @@
 
 #include "EntityManager.h"
 #include "AssetManager.h"
+#include "StringConversion.h"
 
 class SceneLoader
 {
@@ -35,7 +36,7 @@ private:
         std::wstring textCopy = text;
         os.write((char*)(textCopy.c_str()), len * sizeof(wchar_t));
     }
-    std::wstring ReadWString(std::ifstream& in)
+    std::string ReadWString(std::ifstream& in)
     {
         std::wstring returnString;
         size_t len;
@@ -45,7 +46,7 @@ private:
         temp[len] = L'\0';
         returnString = temp;
         delete[] temp;
-        return returnString;
+        return StringConversion::WStringToString(returnString);
     }
     std::string ReadString(std::ifstream& in)
     {
@@ -59,8 +60,6 @@ private:
         delete[] temp;
         return returnString;
     }
-
-    std::string GetExePath();
 
 public:
     SceneLoader(AssetManager* am);
@@ -127,13 +126,13 @@ inline void SceneLoader::WriteComponent<Material>(Material* material, std::ofstr
 
     // Write the component ID, then write the component
     os.write((char*)(&Material::id), sizeof(int));
-    WriteWString(material->albedoName, os);
-    WriteWString(material->normalsName, os);
-    WriteWString(material->metalnessName, os);
-    WriteWString(material->roughnessName, os);
-    WriteWString(material->aoName, os);
-    WriteWString(material->pixelShaderName, os);
-    WriteWString(material->vertexShaderName, os);
+    WriteWString(StringConversion::StringToWString(material->albedoName), os);
+    WriteWString(StringConversion::StringToWString(material->normalsName), os);
+    WriteWString(StringConversion::StringToWString(material->metalnessName), os);
+    WriteWString(StringConversion::StringToWString(material->roughnessName), os);
+    WriteWString(StringConversion::StringToWString(material->aoName), os);
+    WriteWString(StringConversion::StringToWString(material->pixelShaderName), os);
+    WriteWString(StringConversion::StringToWString(material->vertexShaderName), os);
 }
 
 template <>

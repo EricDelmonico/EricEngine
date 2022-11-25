@@ -1,4 +1,5 @@
 #include "SceneLoader.h"
+#include "DirectoryEnumeration.h"
 
 SceneLoader::SceneLoader(AssetManager* am) : am(am)
 {
@@ -11,7 +12,7 @@ void SceneLoader::SaveScene(std::string name)
     auto* entities = em->entities;
 
     std::ofstream os;
-    os.open(GetExePath() + "../../Levels/" + name, std::ios::binary | std::ios::out);
+    os.open(DirectoryEnumeration::GetExePath() + "../../Levels/" + name, std::ios::binary | std::ios::out);
 
     // Write total entity amount
     int count = em->entityCount;
@@ -53,7 +54,7 @@ void SceneLoader::LoadScene(std::string name)
     em->DeregisterAllEntities();
 
     std::ifstream in;
-    in.open(GetExePath() + "../../Levels/" + name, std::ios::binary | std::ios::in);
+    in.open(DirectoryEnumeration::GetExePath() + "../../Levels/" + name, std::ios::binary | std::ios::in);
     
     int entityCount = -1;
     in.read((char*)(&entityCount), sizeof(int));
@@ -170,32 +171,4 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
     }
 
     throw;
-}
-
-std::string SceneLoader::GetExePath()
-{
-    // Assume the path is just the "current directory" for now
-    std::string path = ".\\";
-
-    // Get the real, full path to this executable
-    char currentDir[1024] = {};
-    GetModuleFileNameA(0, currentDir, 1024);
-
-    // Find the location of the last slash charaacter
-    char* lastSlash = strrchr(currentDir, '\\');
-    if (lastSlash)
-    {
-        // End the string at the last slash character, essentially
-        // chopping off the exe's file name.  Remember, c-strings
-        // are null-terminated, so putting a "zero" character in 
-        // there simply denotes the end of the string.
-        *lastSlash = 0;
-
-        // Set the remainder as the path
-        path = currentDir;
-        path += "\\";
-    }
-
-    // Toss back whatever we've found
-    return path;
 }

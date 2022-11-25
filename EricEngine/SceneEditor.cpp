@@ -4,6 +4,8 @@
 #include "Material.h"
 #include "Transform.h"
 #include "Light.h"
+#include "DirectoryEnumeration.h"
+#include "StringConversion.h"
 
 // ImGui
 #include "ImGui/imgui.h"
@@ -28,13 +30,14 @@ void SceneEditor::Update(float dt)
     ImGui::Text(numEntities.c_str());
 
     ImGui::InputInt("Selected Entity: ", &selectedEntity);
-    if (ImGui::CollapsingHeader("SelectedEntityComponents"))
+    if (selectedEntity < 0) selectedEntity = 0;
+    if (selectedEntity >= MAX_ENTITIES) selectedEntity = MAX_ENTITIES - 1;
+    // If we selected an invalid entity, find a valid one
+    while (!em->entities[selectedEntity]) selectedEntity = (selectedEntity + 1) % MAX_ENTITIES;
+    if (ImGui::TreeNode("SelectedEntityComponents"))
     {
-        if (selectedEntity < 0) selectedEntity = 0;
-        if (selectedEntity >= MAX_ENTITIES) selectedEntity = MAX_ENTITIES - 1;
-        // If we selected an invalid entity, find a valid one
-        while (!em->entities[selectedEntity]) selectedEntity = (selectedEntity + 1) % MAX_ENTITIES;
         SelectedEntityUI();
+        ImGui::TreePop();
     }
 
     if (ImGui::Button("Add Entity"))
@@ -47,14 +50,73 @@ void SceneEditor::Update(float dt)
     {
         if (!em->entities[i]) continue;
         // Display every entity
-        if (ImGui::CollapsingHeader(std::to_string(i).c_str()))
+        std::string entityString = "Entity " + std::to_string(i);
+        if (ImGui::TreeNode(entityString.c_str()))
         {
             // Display all the entity's components
             DisplayEntityComponents(i);
+            ImGui::TreePop();
         }
     }
 
     ImGui::End();
+}
+
+bool SceneEditor::DisplayMeshDropdown()
+{
+    bool anythingSelected = false;
+    auto exePath = DirectoryEnumeration::GetExePath();
+    std::vector<std::string>& files = DirectoryEnumeration::GetFileList(exePath + "../../Assets/Models/");
+    if (ImGui::BeginCombo("Meshes: ", "cam.obj"))
+    {
+        for (auto& f : files)
+        {
+            const bool selected = (selectedMesh == f);
+            if (ImGui::Selectable(f.c_str(), &selected))
+            {
+                selectedMesh = f;
+                anythingSelected = true;
+            }
+
+            if (selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+
+    return anythingSelected;
+}
+
+bool SceneEditor::DisplayTextureDropdown(std::string dropdownName, std::string* dataString)
+{
+    bool anythingSelected = false;
+    auto exePath = DirectoryEnumeration::GetExePath();
+    std::vector<std::string>& files = DirectoryEnumeration::GetFileList(exePath + "../../Assets/Textures/");
+    if (ImGui::BeginCombo(dropdownName.c_str(), dataString->c_str()))
+    {
+        for (auto& f : files)
+        {
+            const bool selected = (selectedMesh == f);
+            if (ImGui::Selectable(f.c_str(), &selected))
+            {
+                *dataString = f;
+                anythingSelected = true;
+            }
+
+            if (selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+
+    return anythingSelected;
+}
+
+void SceneEditor::ReplaceMaterial(int entity, Material* newMat)
+{
+    em->RemoveComponent<Material>(entity);
+    em->AddComponent<Material>(entity, newMat);
+
 }
 
 void SceneEditor::SelectedEntityUI()
@@ -77,25 +139,19 @@ void SceneEditor::SelectedEntityUI()
     // For non-existing components--allow the user to add them
     if (mesh == nullptr)
     {
-        ImGui::InputText("Mesh file: ", meshName, 32);
-        if (ImGui::Button("Add Mesh"))
+        if (DisplayMeshDropdown())
         {
-            std::string meshNameStr = meshName;
-            mesh = assetManager->GetMesh(meshNameStr);
-            if (mesh != nullptr)
-            {
-                em->AddComponent<Mesh>(selectedEntity, mesh);
-            }
+            em->AddComponent<Mesh>(selectedEntity, assetManager->GetMesh(selectedMesh));
         }
     }
 
     if (material == nullptr)
     {
-        ImGui::InputText("Albedo Texture: ", albedoName, 32);
-        ImGui::InputText("Normals Texture: ", normalsName, 32);
-        ImGui::InputText("Metalness Texture: ", metalnessName, 32);
-        ImGui::InputText("Roughness Texture: ", roughnessName, 32);
-        ImGui::InputText("AmbientOcclusion Texture: ", aoName, 32);
+        DisplayTextureDropdown("Albedo", &albedoName);
+        DisplayTextureDropdown("Normals", &normalsName);
+        DisplayTextureDropdown("Metalness", &metalnessName);
+        DisplayTextureDropdown("Roughness", &roughnessName);
+        DisplayTextureDropdown("AmbientOcclusion", &aoName);
         ImGui::InputText("PixelShader Name: ", pixelShaderName, 32);
         ImGui::InputText("VertexShader Name: ", vertexShaderName, 32);
 
@@ -103,13 +159,13 @@ void SceneEditor::SelectedEntityUI()
         {
             Material* material = new Material();
 
-            material->albedoName = StringToWString(albedoName);
-            material->normalsName = StringToWString(normalsName);
-            material->metalnessName = StringToWString(metalnessName);
-            material->roughnessName = StringToWString(roughnessName);
-            material->aoName = StringToWString(aoName);
-            material->pixelShaderName = StringToWString(pixelShaderName);
-            material->vertexShaderName = StringToWString(vertexShaderName);
+            material->albedoName = albedoName;
+            material->normalsName = normalsName;
+            material->metalnessName = metalnessName;
+            material->roughnessName = roughnessName;
+            material->aoName = aoName;
+            material->pixelShaderName = pixelShaderName;
+            material->vertexShaderName = vertexShaderName;
 
             auto albedo = assetManager->GetTexture(material->albedoName);
             auto normals = assetManager->GetTexture(material->normalsName);
@@ -145,9 +201,9 @@ void SceneEditor::SelectedEntityUI()
 
     if (transform == nullptr)
     {
-        ImGui::DragFloat3("Position: ", &pos.x);
-        ImGui::DragFloat3("Scale: ", &scale.x);
-        ImGui::DragFloat3("PitchYawRoll: ", &pitchYawRoll.x);
+        ImGui::DragFloat3("Position: ", &pos.x, 0.05f);
+        ImGui::DragFloat3("Scale: ", &scale.x, 0.05f);
+        ImGui::DragFloat3("PitchYawRoll: ", &pitchYawRoll.x, 3.14f / 360.0f);
 
         if (ImGui::Button("Add Transform"))
         {
@@ -163,9 +219,9 @@ void SceneEditor::SelectedEntityUI()
 
     if (light == nullptr)
     {
-        ImGui::DragFloat3("Dir: ", &dir.x);
+        ImGui::DragFloat3("Dir: ", &dir.x, 3.14f / 360);
         ImGui::ColorPicker3("Color: ", &color.x);
-        ImGui::DragFloat("Intensity: ", &intensity);
+        ImGui::DragFloat("Intensity: ", &intensity, 0.05f);
 
         if (ImGui::Button("Add Light"))
         {
@@ -197,53 +253,99 @@ void SceneEditor::DisplayEntityComponents(int e)
 
     if (mesh != nullptr)
     {
-        if (ImGui::CollapsingHeader("Mesh"))
+        if (ImGui::TreeNode("Mesh"))
         {
             ImGui::Text(mesh->name.c_str());
+            if (DisplayMeshDropdown())
+            {
+                em->RemoveComponent<Mesh>(e);
+                em->AddComponent<Mesh>(e, assetManager->GetMesh(selectedMesh));
+            }
+            if (ImGui::Button("Remove Mesh"))
+            {
+                em->RemoveComponent<Mesh>(e);
+            }
+            ImGui::TreePop();
         }
     }
     if (material != nullptr)
     {
-        if (ImGui::CollapsingHeader("Material"))
+        if (ImGui::TreeNode("Material"))
         {
-            ImGui::Text(WStringToString(L"Albedo: " + material->albedoName).c_str());
-            ImGui::Text(WStringToString(L"Normals: " + material->normalsName).c_str());
-            ImGui::Text(WStringToString(L"Metalness: " + material->metalnessName).c_str());
-            ImGui::Text(WStringToString(L"Roughness: " + material->roughnessName).c_str());
-            ImGui::Text(WStringToString(L"AO: " + material->aoName).c_str());
-            ImGui::Text(WStringToString(L"PixelShader: " + material->pixelShaderName).c_str());
-            ImGui::Text(WStringToString(L"VertexShader: " + material->vertexShaderName).c_str());
+            bool changedTexture = false;
+            changedTexture |= DisplayTextureDropdown("Albedo", &material->albedoName);
+            changedTexture |= DisplayTextureDropdown("Normals", &material->normalsName);
+            changedTexture |= DisplayTextureDropdown("Metalness", &material->metalnessName);
+            changedTexture |= DisplayTextureDropdown("Roughness", &material->roughnessName);
+            changedTexture |= DisplayTextureDropdown("AmbientOcclusion", &material->aoName);
+            if (changedTexture)
+            {
+                Material* mat = new Material();
+
+                mat->albedoName = material->albedoName;
+                mat->normalsName = material->normalsName;
+                mat->metalnessName = material->metalnessName;
+                mat->roughnessName = material->roughnessName;
+                mat->aoName = material->aoName;
+                mat->pixelShaderName = material->pixelShaderName;
+                mat->vertexShaderName = material->vertexShaderName;
+
+                mat->albedo = assetManager->GetTexture(mat->albedoName);
+                mat->normals = assetManager->GetTexture(mat->normalsName);
+                mat->metalness = assetManager->GetTexture(mat->metalnessName);
+                mat->roughness = assetManager->GetTexture(mat->roughnessName);
+                mat->ao = assetManager->GetTexture(mat->aoName);
+                mat->pixelShader = assetManager->GetPixelShader(mat->pixelShaderName).get();
+                mat->vertexShader = assetManager->GetVertexShader(mat->vertexShaderName).get();
+
+                ReplaceMaterial(e, mat);
+                ImGui::TreePop();
+                return;
+            }
+            ImGui::Text(("PixelShader: " + material->pixelShaderName).c_str());
+            ImGui::Text(("VertexShader: " + material->vertexShaderName).c_str());
+            if (ImGui::Button("Remove Material"))
+            {
+                em->RemoveComponent<Material>(e);
+            }
+            ImGui::TreePop();
         }
     }
     if (transform != nullptr)
     {
-        if (ImGui::CollapsingHeader("Transform"))
+        if (ImGui::TreeNode("Transform"))
         {
             auto position = transform->GetPosition();
-            if (ImGui::DragFloat3("Position: ", &position.x))
+            if (ImGui::DragFloat3("Position: ", &position.x, 0.05f))
             {
                 transform->SetPosition(position.x, position.y, position.z);
             }
 
+            auto scale = transform->GetScale();
+            if (ImGui::DragFloat3("Scale: ", &scale.x, 0.05f))
+            {
+                transform->SetScale(scale.x, scale.y, scale.z);
+            }
+
             auto pitchYawRoll = transform->GetPitchYawRoll();
-            if (ImGui::DragFloat3("PitchYawRoll: ", &pitchYawRoll.x))
+            if (ImGui::DragFloat3("PitchYawRoll: ", &pitchYawRoll.x, 3.14f / 360.0f))
             {
                 transform->SetPitchYawRoll(pitchYawRoll.x, pitchYawRoll.y, pitchYawRoll.z);
             }
 
-            auto scale = transform->GetScale();
-            if (ImGui::DragFloat3("Scale: ", &scale.x))
+            if (ImGui::Button("Remove Transform"))
             {
-                transform->SetScale(scale.x, scale.y, scale.z);
+                em->RemoveComponent<Transform>(e);
             }
+            ImGui::TreePop();
         }
     }
     if (light != nullptr)
     {
-        if (ImGui::CollapsingHeader("Light"))
+        if (ImGui::TreeNode("Light"))
         {
             auto dir = light->dir;
-            if (ImGui::DragFloat3("Dir: ", &dir.x))
+            if (ImGui::DragFloat3("Dir: ", &dir.x, 3.14f / 360))
             {
                 light->dir = dir;
             }
@@ -255,24 +357,16 @@ void SceneEditor::DisplayEntityComponents(int e)
             }
 
             auto intensity = light->intensity;
-            if (ImGui::DragFloat("Intensity: ", &intensity))
+            if (ImGui::DragFloat("Intensity: ", &intensity, 0.05f))
             {
                 light->intensity = intensity;
             }
+
+            if (ImGui::Button("Remove Light"))
+            {
+                em->RemoveComponent<Light>(e);
+            }
+            ImGui::TreePop();
         }
     }
-}
-
-// https://stackoverflow.com/questions/2573834/c-convert-string-or-char-to-wstring-or-wchar-t
-std::string SceneEditor::WStringToString(std::wstring wstr)
-{
-    //setup converter
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
-    return myconv.to_bytes(wstr);
-}
-
-std::wstring SceneEditor::StringToWString(std::string str)
-{
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
-    return myconv.from_bytes(str);
 }

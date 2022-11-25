@@ -15,8 +15,8 @@ public:
     AssetManager(std::shared_ptr<D3DResources> d3dResources);
     ~AssetManager();
 
-    std::shared_ptr<SimplePixelShader> GetPixelShader(std::wstring name);
-    std::shared_ptr<SimpleVertexShader> GetVertexShader(std::wstring name);
+    std::shared_ptr<SimplePixelShader> GetPixelShader(std::string name);
+    std::shared_ptr<SimpleVertexShader> GetVertexShader(std::string name);
     /// <summary>
     /// Retrieves a mesh from the AssetManager or loads in the file
     /// 
@@ -32,20 +32,17 @@ public:
     /// </summary>
     /// <param name="name">The name of the texture file, including file extension</param>
     /// <returns>Shader resource view </returns>
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTexture(std::wstring name);
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTexture(std::string name);
 
     Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState() { return m_basicSamplerState; }
 
 private:
     std::shared_ptr<D3DResources> m_d3dResources;
 
-    std::unordered_map<std::wstring, std::shared_ptr<SimplePixelShader>> m_pixelShaders;
-    std::unordered_map<std::wstring, std::shared_ptr<SimpleVertexShader>> m_vertexShaders;
+    std::unordered_map<std::string, std::shared_ptr<SimplePixelShader>> m_pixelShaders;
+    std::unordered_map<std::string, std::shared_ptr<SimpleVertexShader>> m_vertexShaders;
 
-    std::wstring GetExePathLong();
-    std::string GetExePath();
-
-    std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> m_loadedTextureSRVs;
+    std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> m_loadedTextureSRVs;
 
     std::unordered_map<std::string, Mesh*> m_loadedMeshes;
 

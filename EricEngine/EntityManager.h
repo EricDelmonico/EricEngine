@@ -119,7 +119,7 @@ namespace ECS
     inline ComponentType* EntityManager::GetComponent(int entityID)
     {
         int componentID = ComponentType::id;
-        return (ComponentType*)(components[componentID][entityID]);
+        return dynamic_cast<ComponentType*>(components[componentID][entityID]);
     }
     template<class... ComponentTypes>
     inline std::vector<int> EntityManager::GetEntitiesWithComponents()
