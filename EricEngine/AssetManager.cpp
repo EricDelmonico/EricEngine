@@ -34,6 +34,9 @@ AssetManager::~AssetManager()
     {
         delete kvp.second;
     }
+
+    m_loadedMeshes.clear();
+    m_loadedTextureSRVs.clear();
 }
 
 std::shared_ptr<SimplePixelShader> AssetManager::GetPixelShader(std::string name)
