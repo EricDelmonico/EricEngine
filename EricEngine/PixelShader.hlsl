@@ -5,6 +5,7 @@
 cbuffer ExternalData
 {
 	float3 camPosition;
+	float3 tint;
 	float3 sunColor;
 	float3 sunDir;
 	float sunIntensity;
@@ -66,5 +67,5 @@ float4 main(VertexToPixel_NormalMap input) : SV_TARGET
 	float gC = 1.0 / 2.2;
 	color = pow(color, gC);
 
-	return float4(color, 1.0);
+	return float4(color * tint, 1.0);
 }

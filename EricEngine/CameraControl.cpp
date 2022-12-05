@@ -49,6 +49,9 @@ void CameraControl::Update(float dt)
         cam->transform.Rotate(yDiff, xDiff, 0);
     }
 
+    auto pos = cam->transform.GetPosition();
+    cam->transform.SetPosition(pos.x, 30, pos.z);
+
     // At the end, update the view
     cam->UpdateViewMatrix();
 }

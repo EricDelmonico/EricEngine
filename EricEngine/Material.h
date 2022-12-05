@@ -27,6 +27,8 @@ struct Material : ECS::Component
     SimplePixelShader* pixelShader;
     SimpleVertexShader* vertexShader;
 
+    DirectX::XMFLOAT3 tint = { 1, 1, 1 };
+
     virtual ~Material() {}
 
     static int id;

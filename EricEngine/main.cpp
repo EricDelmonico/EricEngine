@@ -16,6 +16,7 @@
 #include "SceneLoader.h"
 #include "SceneEditor.h"
 #include "CameraControl.h"
+#include "Raycasting.h"
 
 #include <Windows.h>
 #include <memory>
@@ -172,6 +173,8 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     // ---------------- initialize systems ----------------
     std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources);
     CameraControl camControl = CameraControl();
+    Raycasting raycasting = Raycasting();
+    // ----------------------------------------------------
 
     EntityManager* em = &EntityManager::GetInstance();
 
@@ -211,8 +214,12 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
             UpdateImGui(sceneLoader, sceneName, dt);
             sceneEditor.Update(dt);
 #endif
+
+            // ------------------ update systems ------------------
             camControl.Update(dt);
+            raycasting.Update(dt);
             renderer->Render();
+            // ----------------------------------------------------
 
             Input::GetInstance().EndOfFrame();
 

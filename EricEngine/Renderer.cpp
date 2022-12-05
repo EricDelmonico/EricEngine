@@ -61,6 +61,7 @@ void Renderer::Render()
         pixelShader->SetShaderResourceView("AO", material->ao);
         pixelShader->SetSamplerState("BasicSampler", material->samplerState);
         pixelShader->SetFloat3("camPosition", camera->GetTransform()->GetPosition());
+        pixelShader->SetFloat3("tint", material->tint);
         if (light != nullptr)
         {
             pixelShader->SetFloat3("sunDir", light->dir);
