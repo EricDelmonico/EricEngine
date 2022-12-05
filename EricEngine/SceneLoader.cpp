@@ -127,8 +127,8 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
         material->roughness = am->GetTexture(material->roughnessName);
         material->ao = am->GetTexture(material->aoName);
 
-        material->pixelShader = am->GetPixelShader(material->pixelShaderName).get();
-        material->vertexShader = am->GetVertexShader(material->vertexShaderName).get();
+        material->pixelShader = am->GetPixelShader(material->pixelShaderName);
+        material->vertexShader = am->GetVertexShader(material->vertexShaderName);
 
         material->samplerState = am->GetSamplerState();
 

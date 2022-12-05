@@ -192,8 +192,8 @@ void SceneEditor::SelectedEntityUI()
                 material->metalness = metalness;
                 material->roughness = roughness;
                 material->ao = ao;
-                material->pixelShader = ps.get();
-                material->vertexShader = vs.get();
+                material->pixelShader = ps;
+                material->vertexShader = vs;
                 em->AddComponent<Material>(selectedEntity, material);
             }
         }
@@ -295,8 +295,8 @@ void SceneEditor::DisplayEntityComponents(int e)
                 mat->metalness = assetManager->GetTexture(mat->metalnessName);
                 mat->roughness = assetManager->GetTexture(mat->roughnessName);
                 mat->ao = assetManager->GetTexture(mat->aoName);
-                mat->pixelShader = assetManager->GetPixelShader(mat->pixelShaderName).get();
-                mat->vertexShader = assetManager->GetVertexShader(mat->vertexShaderName).get();
+                mat->pixelShader = assetManager->GetPixelShader(mat->pixelShaderName);
+                mat->vertexShader = assetManager->GetVertexShader(mat->vertexShaderName);
 
                 ReplaceMaterial(e, mat);
                 ImGui::TreePop();

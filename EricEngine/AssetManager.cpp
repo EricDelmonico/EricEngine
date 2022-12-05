@@ -30,38 +30,31 @@ AssetManager::AssetManager(std::shared_ptr<D3DResources> d3dResources) : m_d3dRe
 
 AssetManager::~AssetManager()
 {
-    for (auto kvp : m_loadedMeshes)
-    {
-        delete kvp.second;
-    }
-
-    m_loadedMeshes.clear();
-    m_loadedTextureSRVs.clear();
 }
 
-std::shared_ptr<SimplePixelShader> AssetManager::GetPixelShader(std::string name)
+SimplePixelShader* AssetManager::GetPixelShader(std::string name)
 {
-    if (m_pixelShaders.find(name) != m_pixelShaders.end()) return m_pixelShaders[name];
+    if (m_pixelShaders.find(name) != m_pixelShaders.end()) return m_pixelShaders[name].get();
 
     auto device = m_d3dResources->GetDeviceComPtr();
     auto context = m_d3dResources->GetContextComPtr();
-    m_pixelShaders.insert({ name, std::make_shared<SimplePixelShader>(device, context, StringConversion::StringToWString(DirectoryEnumeration::GetExePath() + name + ".cso").c_str())});
-    return m_pixelShaders[name];
+    m_pixelShaders.insert({ name, std::make_unique<SimplePixelShader>(device, context, StringConversion::StringToWString(DirectoryEnumeration::GetExePath() + name + ".cso").c_str())});
+    return m_pixelShaders[name].get();
 }
 
-std::shared_ptr<SimpleVertexShader> AssetManager::GetVertexShader(std::string name)
+SimpleVertexShader* AssetManager::GetVertexShader(std::string name)
 {
-    if (m_vertexShaders.find(name) != m_vertexShaders.end()) return m_vertexShaders[name];
+    if (m_vertexShaders.find(name) != m_vertexShaders.end()) return m_vertexShaders[name].get();
 
     auto device = m_d3dResources->GetDeviceComPtr();
     auto context = m_d3dResources->GetContextComPtr();
-    m_vertexShaders.insert({ name, std::make_shared<SimpleVertexShader>(device, context, StringConversion::StringToWString(DirectoryEnumeration::GetExePath() + name + ".cso").c_str()) });
-    return m_vertexShaders[name];
+    m_vertexShaders.insert({ name, std::make_unique<SimpleVertexShader>(device, context, StringConversion::StringToWString(DirectoryEnumeration::GetExePath() + name + ".cso").c_str()) });
+    return m_vertexShaders[name].get();
 }
 
 Mesh* AssetManager::GetMesh(std::string name)
 {
-    if (m_loadedMeshes.find(name) != m_loadedMeshes.end()) return m_loadedMeshes[name];
+    if (m_loadedMeshes.find(name) != m_loadedMeshes.end()) return &m_loadedMeshes[name];
 
     // Create an instance of the importer class
     Assimp::Importer importer;
@@ -144,15 +137,15 @@ Mesh* AssetManager::GetMesh(std::string name)
 
         m_d3dResources->GetDevice()->CreateBuffer(&iDesc, &iData, &ib);
 
-        m_loadedMeshes.insert({ name, new Mesh() });
-        auto mesh = m_loadedMeshes[name];
-        mesh->vertexBuffer = vb;
-        mesh->indexBuffer = ib;
-        mesh->indices = numIndices;
-        mesh->boundingMax = max;
-        mesh->boundingMin = min;
-        mesh->name = name;
-        return m_loadedMeshes[name];
+        m_loadedMeshes.insert({ name, Mesh() });
+        auto& mesh = m_loadedMeshes[name];
+        mesh.vertexBuffer = vb;
+        mesh.indexBuffer = ib;
+        mesh.indices = numIndices;
+        mesh.boundingMax = max;
+        mesh.boundingMin = min;
+        mesh.name = name;
+        return &m_loadedMeshes[name];
     }
 
     // If we got here, we did not have a mesh

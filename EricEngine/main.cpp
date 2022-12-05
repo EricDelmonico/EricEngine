@@ -15,6 +15,7 @@
 #include "Light.h"
 #include "SceneLoader.h"
 #include "SceneEditor.h"
+#include "CameraControl.h"
 
 #include <Windows.h>
 #include <memory>
@@ -150,7 +151,6 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
 
     // Create asset manager
     AssetManager* assetManager = new AssetManager(d3dResources);
-
     // Create scene loader
     SceneLoader* sceneLoader = new SceneLoader(assetManager);
 
@@ -159,7 +159,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     SceneEditor sceneEditor(sceneLoader, assetManager);
 #endif
 
-    // Create Camera and renderer
+    // Create Camera
     Camera* camera = new Camera(
         0,              // x
         20,             // y
@@ -168,7 +168,10 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
         1,              // lookSpeed
         3.14f / 3.0f,   // FOV
         16.0f / 9.0f);  // aspectRatio
+
+    // ---------------- initialize systems ----------------
     std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources);
+    CameraControl camControl = CameraControl();
 
     EntityManager* em = &EntityManager::GetInstance();
 
@@ -202,19 +205,13 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
             Input::GetInstance().SetGuiKeyboardCapture(false);
             Input::GetInstance().SetGuiMouseCapture(false);
 
-#ifdef _DEBUG
-            UpdateImGui(sceneLoader, sceneName, dt);
-#endif
-
             Input::GetInstance().Update();
 
-            auto camEntities = em->GetEntitiesWithComponents<Camera>();
-            em->GetComponent<Camera>(camEntities[0])->Update(dt);
-
 #if _DEBUG
+            UpdateImGui(sceneLoader, sceneName, dt);
             sceneEditor.Update(dt);
 #endif
-
+            camControl.Update(dt);
             renderer->Render();
 
             Input::GetInstance().EndOfFrame();

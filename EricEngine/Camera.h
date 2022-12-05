@@ -2,9 +2,12 @@
 #include <DirectXMath.h>
 #include "Transform.h"
 #include "EntityManager.h"
+#include "CameraControl.h"
 
 struct Camera : ECS::Component
 {
+    friend class CameraControl;
+
 public:
     Camera();
 
@@ -32,7 +35,6 @@ public:
     virtual ~Camera();
 
     // Update methods
-    void Update(float dt);
     void UpdateViewMatrix();
     void UpdateProjectionMatrix(float aspectRatio);
 

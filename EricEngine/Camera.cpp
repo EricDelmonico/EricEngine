@@ -1,5 +1,4 @@
 #include "Camera.h"
-#include "Input.h"
 #include <iostream>
 
 using namespace DirectX;
@@ -61,46 +60,6 @@ Camera::Camera(
 
 Camera::~Camera()
 {
-}
-
-void Camera::Update(float dt)
-{
-    // Get a reference to the input manager
-    Input& input = Input::GetInstance();
-
-    // Calculate the current speed
-    float speed = movementSpeed * dt;
-
-    // Movement
-    if (input.KeyDown(VK_LSHIFT)) { speed *= 2; }
-    if (input.KeyDown('W')) { transform.MoveRelative(0, 0, -speed); }
-    if (input.KeyDown('S')) { transform.MoveRelative(0, 0, speed); }
-    if (input.KeyDown('A')) { transform.MoveRelative(speed, 0, 0); }
-    if (input.KeyDown('D')) { transform.MoveRelative(-speed, 0, 0); }
-    if (input.KeyDown('E')) { transform.MoveAbsolute(0, speed, 0); }
-    if (input.KeyDown('Q')) { transform.MoveAbsolute(0, -speed, 0); }
-
-    // Rotate if the mouse is down
-    if (input.MouseLeftDown())
-    {
-        // Calculate how much the cursor changed
-        float xDiff = dt * mouseLookSpeed * input.GetMouseXDelta();
-        float yDiff = dt * -mouseLookSpeed * input.GetMouseYDelta();
-
-        // Don't allow pitch to go more than 90 degrees or less than -90 degrees
-        XMFLOAT3 pitchYawRoll = transform.GetPitchYawRoll();
-        if (pitchYawRoll.x + yDiff > DirectX::XM_PIDIV2 - 0.05f ||
-            pitchYawRoll.x + yDiff < -DirectX::XM_PIDIV2 + 0.05f)
-        {
-            yDiff = 0;
-        }
-
-        // Rotate the transform! SWAP X AND Y!
-        transform.Rotate(yDiff, xDiff, 0);
-    }
-
-    // At the end, update the view
-    UpdateViewMatrix();
 }
 
 void Camera::UpdateViewMatrix()

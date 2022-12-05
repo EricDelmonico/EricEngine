@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraControl.cpp" />
     <ClCompile Include="D3DResources.cpp" />
     <ClCompile Include="DirectoryEnumeration.cpp" />
     <ClCompile Include="EntityManager.cpp" />
@@ -157,6 +158,7 @@
   <ItemGroup>
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraControl.h" />
     <ClInclude Include="D3DResources.h" />
     <ClInclude Include="DirectoryEnumeration.h" />
     <ClInclude Include="EntityManager.h" />
