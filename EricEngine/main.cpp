@@ -17,6 +17,7 @@
 #include "SceneEditor.h"
 #include "CameraControl.h"
 #include "Raycasting.h"
+#include "RaycastObject.h"
 
 #include <Windows.h>
 #include <memory>
@@ -141,6 +142,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     EntityManager::RegisterNewComponentType<Material>();
     EntityManager::RegisterNewComponentType<Camera>();
     EntityManager::RegisterNewComponentType<Light>();
+    EntityManager::RegisterNewComponentType<RaycastObject>();
 
     // Create and initialize D3D11
     std::shared_ptr<D3DResources> d3dResources = std::make_shared<D3DResources>(WIDTH, HEIGHT);
@@ -171,8 +173,8 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
         16.0f / 9.0f);  // aspectRatio
 
     // ---------------- initialize systems ----------------
-    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, assetManager->GetMesh("cube.obj"));
-    CameraControl camControl = CameraControl();
+    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources);
+    CameraControl camControl = CameraControl(mw.GetWindow(), WIDTH, HEIGHT);
     Raycasting raycasting = Raycasting();
     // ----------------------------------------------------
 
@@ -188,7 +190,11 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     auto thisFrameTime = prevFrameTime;
 
 #ifdef _DEBUG
-    char sceneName[128] = "Empty.scene";
+    char sceneName[128] = "Default.scene";
+#else
+    // Load scene
+    char sceneName[128] = "Default.scene";
+    sceneLoader->LoadScene(sceneName);
 #endif
 
     MSG msg = { };

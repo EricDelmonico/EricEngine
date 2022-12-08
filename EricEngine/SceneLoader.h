@@ -73,9 +73,8 @@ inline void SceneLoader::WriteComponent(ComponentType* component, std::ofstream&
 {
     if (component == nullptr) return;
 
-    // Write the component ID, then write the component
+    // By default, just write the component ID
     os.write((char*)(&ComponentType::id), sizeof(int));
-    os.write((char*)(component), sizeof(ComponentType));
 }
 
 template <>

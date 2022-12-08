@@ -23,11 +23,11 @@ private:
 
     char meshName[32] = "cube.obj";
 
-    std::string albedoName = "black_roughness.png";
-    std::string normalsName = "black_roughness.png";
-    std::string metalnessName = "black_roughness.png";
-    std::string roughnessName = "black_roughness.png";
-    std::string aoName = "white_roughness.png";
+    std::string albedoName = "white_albedo.png";
+    std::string normalsName = "white_albedo.png";
+    std::string metalnessName = "white_albedo.png";
+    std::string roughnessName = "white_albedo.png";
+    std::string aoName = "white_albedo.png";
     char pixelShaderName[32] = "PixelShader";
     char vertexShaderName[32] = "VertexShader";
 

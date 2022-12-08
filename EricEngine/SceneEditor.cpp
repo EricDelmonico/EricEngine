@@ -4,6 +4,7 @@
 #include "Material.h"
 #include "Transform.h"
 #include "Light.h"
+#include "RaycastObject.h"
 #include "DirectoryEnumeration.h"
 #include "StringConversion.h"
 
@@ -133,6 +134,9 @@ void SceneEditor::SelectedEntityUI()
     Light* light = nullptr;
     if (em->EntityHasComponent(Light::id, selectedEntity)) light = em->GetComponent<Light>(selectedEntity);
 
+    RaycastObject* ro = nullptr;
+    if (em->EntityHasComponent(RaycastObject::id, selectedEntity)) ro = em->GetComponent<RaycastObject>(selectedEntity);
+
     // Display any existing components
     DisplayEntityComponents(selectedEntity);
 
@@ -194,6 +198,7 @@ void SceneEditor::SelectedEntityUI()
                 material->ao = ao;
                 material->pixelShader = ps;
                 material->vertexShader = vs;
+                material->samplerState = assetManager->GetSamplerState();
                 em->AddComponent<Material>(selectedEntity, material);
             }
         }
@@ -219,19 +224,31 @@ void SceneEditor::SelectedEntityUI()
 
     if (light == nullptr)
     {
-        ImGui::DragFloat3("Dir: ", &dir.x, 3.14f / 360);
-        ImGui::ColorPicker3("Color: ", &color.x);
-        ImGui::DragFloat("Intensity: ", &intensity, 0.05f);
-
-        if (ImGui::Button("Add Light"))
+        if (ImGui::TreeNode("Light Component"))
         {
-            Light* light = new Light();
+            ImGui::DragFloat3("Dir: ", &dir.x, 3.14f / 360);
+            ImGui::ColorPicker3("Color: ", &color.x);
+            ImGui::DragFloat("Intensity: ", &intensity, 0.05f);
 
-            light->dir = dir;
-            light->color = color;
-            light->intensity = intensity;
+            if (ImGui::Button("Add Light"))
+            {
+                Light* light = new Light();
 
-            em->AddComponent<Light>(selectedEntity, light);
+                light->dir = dir;
+                light->color = color;
+                light->intensity = intensity;
+
+                em->AddComponent<Light>(selectedEntity, light);
+            }
+            ImGui::TreePop();
+        }
+    }
+
+    if (ro == nullptr)
+    {
+        if (ImGui::Button("Add Raycast Object"))
+        {
+            em->AddComponent<RaycastObject>(selectedEntity, new RaycastObject());
         }
     }
 }
@@ -250,6 +267,9 @@ void SceneEditor::DisplayEntityComponents(int e)
 
     Light* light = nullptr;
     if (em->EntityHasComponent(Light::id, e)) light = em->GetComponent<Light>(e);
+
+    RaycastObject* ro = nullptr;
+    if (em->EntityHasComponent(RaycastObject::id, e)) ro = em->GetComponent<RaycastObject>(e);
 
     if (mesh != nullptr)
     {
@@ -289,6 +309,7 @@ void SceneEditor::DisplayEntityComponents(int e)
                 mat->aoName = material->aoName;
                 mat->pixelShaderName = material->pixelShaderName;
                 mat->vertexShaderName = material->vertexShaderName;
+                mat->samplerState = material->samplerState;
 
                 mat->albedo = assetManager->GetTexture(mat->albedoName);
                 mat->normals = assetManager->GetTexture(mat->normalsName);
@@ -365,6 +386,17 @@ void SceneEditor::DisplayEntityComponents(int e)
             if (ImGui::Button("Remove Light"))
             {
                 em->RemoveComponent<Light>(e);
+            }
+            ImGui::TreePop();
+        }
+    }
+    if (ro != nullptr)
+    {
+        if (ImGui::TreeNode("Raycast Object"))
+        {
+            if (ImGui::Button("Remove Raycast Object"))
+            {
+                em->RemoveComponent<RaycastObject>(e);
             }
             ImGui::TreePop();
         }

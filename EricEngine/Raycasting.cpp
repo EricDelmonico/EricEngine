@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "Material.h"
+#include "RaycastObject.h"
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -12,7 +13,7 @@ void Raycasting::Update(float dt)
     auto& em = ECS::EntityManager::GetInstance();
 
     // Get all meshes in the scene
-    auto entitiesWithMesh = em.GetEntitiesWithComponents<Mesh, Transform, Material>();
+    auto entitiesWithMesh = em.GetEntitiesWithComponents<Mesh, Transform, Material, RaycastObject>();
 
     // Camera will be the source of the raycast
     auto entitiesWithCamera = em.GetEntitiesWithComponents<Camera>();
@@ -104,5 +105,5 @@ void Raycasting::Update(float dt)
     if (closestEntity == INVALID_ENTITY) return;
 
     Material* mat = em.GetComponent<Material>(closestEntity);
-    mat->tint = { 1, 0.2f, 0.2f };
+    mat->tint = { .5f, 0.2f, 0.2f };
 }

@@ -288,3 +288,20 @@ bool Input::MouseRightRelease() { return !(kbState[VK_RBUTTON] & 0x80) && prevKb
 
 bool Input::MouseMiddlePress() { return kbState[VK_MBUTTON] & 0x80 && !(prevKbState[VK_MBUTTON] & 0x80) && !guiWantsMouse; }
 bool Input::MouseMiddleRelease() { return !(kbState[VK_MBUTTON] & 0x80) && prevKbState[VK_MBUTTON] & 0x80 && !guiWantsMouse; }
+
+void Input::ResetPrevMousePos()
+{
+	// Get the current mouse position then make it relative to the window
+	POINT mousePos = {};
+	GetCursorPos(&mousePos);
+	ScreenToClient(windowHandle, &mousePos);
+
+	// Save the previous mouse position, then the current mouse 
+	// position and finally calculate the change from the previous frame
+	prevMouseX = mouseX;
+	prevMouseY = mouseY;
+	mouseX = mousePos.x;
+	mouseY = mousePos.y;
+	mouseXDelta = mouseX - prevMouseX;
+	mouseYDelta = mouseY - prevMouseY;
+}

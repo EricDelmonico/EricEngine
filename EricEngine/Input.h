@@ -74,6 +74,8 @@ public:
 	void SetGuiKeyboardCapture(bool capture) { guiWantsKeyboard = capture; }
 	void SetGuiMouseCapture(bool capture) { guiWantsMouse = capture; }
 
+	void ResetPrevMousePos();
+
 private:
 	// Arrays for the current and previous key states
 	unsigned char* kbState{ 0 };

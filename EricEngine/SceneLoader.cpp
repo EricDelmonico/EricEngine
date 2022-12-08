@@ -1,5 +1,6 @@
 #include "SceneLoader.h"
 #include "DirectoryEnumeration.h"
+#include "RaycastObject.h"
 
 SceneLoader::SceneLoader(AssetManager* am) : am(am)
 {
@@ -30,12 +31,14 @@ void SceneLoader::SaveScene(std::string name)
         Camera* camera = em->GetComponent<Camera>(i);
         Transform* transform = em->GetComponent<Transform>(i);
         Light* light = em->GetComponent<Light>(i);
+        RaycastObject* ro = em->GetComponent<RaycastObject>(i);
 
         if (mesh != nullptr) components++;
         if (material != nullptr) components++;
         if (camera != nullptr) components++;
         if (transform != nullptr) components++;
         if (light != nullptr) components++;
+        if (ro != nullptr) components++;
 
         // Write the number of components, then write each component
         os.write((char*)(&components), sizeof(int));
@@ -44,6 +47,7 @@ void SceneLoader::SaveScene(std::string name)
         WriteComponent<Camera>(camera, os);
         WriteComponent<Transform>(transform, os);
         WriteComponent<Light>(light, os);
+        WriteComponent<RaycastObject>(ro, os);
     }
 
     os.close();
@@ -168,6 +172,12 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
         in.read((char*)(&light->color), sizeof(DirectX::XMFLOAT3));
         in.read((char*)(&light->intensity), sizeof(float));
         return light;
+    }
+
+    if (componentID == RaycastObject::id)
+    {
+        RaycastObject* ro = new RaycastObject();
+        return ro;
     }
 
     throw;

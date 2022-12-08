@@ -17,15 +17,12 @@
 class Renderer
 {
 public:
-    Renderer(std::shared_ptr<D3DResources> d3dResources, Mesh* cube);
+    Renderer(std::shared_ptr<D3DResources> d3dResources);
 
     void Render();
 
 private:
     std::shared_ptr<D3DResources> m_d3dResources;
     AssetManager* m_assetManager;
-
-    Mesh* cube;
-    Transform cubeTransform;
 };
 

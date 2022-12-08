@@ -148,6 +148,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Raycasting.cpp" />
+    <ClCompile Include="RaycastObject.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SceneEditor.cpp" />
     <ClCompile Include="SceneLoader.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Raycasting.h" />
+    <ClInclude Include="RaycastObject.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="SceneEditor.h" />
     <ClInclude Include="SceneLoader.h" />
