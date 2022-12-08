@@ -42,42 +42,37 @@ void Raycasting::Update(float dt)
         XMFLOAT3 localOrigin;
         XMFLOAT3 localDirection;
         {
-            XMVECTOR originMath;
+            XMVECTOR start;
             XMVECTOR directionMath;
         
             auto pos = transform->position;
             auto scale = transform->scale;
             auto pitchYawRoll = transform->pitchYawRoll;
 
-            XMMATRIX transMat = XMMatrixTranslation(-pos.x, -pos.y, -pos.z);
-            XMMATRIX rotMat = XMMatrixRotationRollPitchYaw(pitchYawRoll.x, pitchYawRoll.y, pitchYawRoll.z);
-            auto rotMatDeterminant = XMMatrixDeterminant(rotMat);
-            rotMat = XMMatrixInverse(&rotMatDeterminant, rotMat);
-            XMMATRIX scaleMat = XMMatrixScaling(1.0f / scale.x, 1.0f / scale.y, 1.0f / scale.z);
-
             auto worldMat = transform->GetWorldMatrix();
             XMMATRIX invMat = XMMatrixInverse(0, XMLoadFloat4x4(&worldMat));
 
             // Apply in reverse order
-            XMMATRIX backwardsWorldMat = invMat;// transMat * rotMat * scaleMAt;
+            XMMATRIX backwardsWorldMat = invMat;
 
             // Transform ray to local space
-            originMath = XMLoadFloat3(&origin);
+            start = XMLoadFloat3(&origin);
             directionMath = XMLoadFloat3(&direction);
-            directionMath = directionMath + originMath;
+            XMVECTOR end = start + directionMath;
 
-            originMath = XMVector3Transform(originMath, backwardsWorldMat);
-            directionMath = XMVector3Transform(directionMath, backwardsWorldMat);
-            directionMath = originMath - directionMath;
+            XMVECTOR newOrigin = XMVector3Transform(start, invMat);
+            XMVECTOR newEnd = XMVector3Transform(end, invMat);
+            directionMath = newEnd - newOrigin;
+            XMVECTOR newDir = XMVector3Normalize(directionMath);
             
-            XMStoreFloat3(&localOrigin, originMath);
-            XMStoreFloat3(&localDirection, directionMath);
+            XMStoreFloat3(&localOrigin, newOrigin);
+            XMStoreFloat3(&localDirection, newDir);
         }
 
         XMFLOAT3 dirFrac = localDirection;
-        dirFrac.x = 1.0f / dirFrac.x;
-        dirFrac.y = 1.0f / dirFrac.y;
-        dirFrac.z = 1.0f / dirFrac.z;
+        dirFrac.x = -1.0 * dirFrac.x;
+        dirFrac.y = -1.0 * dirFrac.y;
+        dirFrac.z = -1.0 * dirFrac.z;
 
         t[0] = (min.x - localOrigin.x) / dirFrac.x;
         t[1] = (max.x - localOrigin.x) / dirFrac.x;
