@@ -8,7 +8,6 @@ public:
     CameraControl(HWND hWnd, int windowWidth, int windowHeight);
 
 private:
-    float sensitivity = 1.0f;
+    float sensitivity = 0.1f;
     POINT screenCenter;
 };
-

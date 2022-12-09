@@ -45,11 +45,6 @@ public:
         return id;
     }
 
-    virtual int Size()
-    {
-        return sizeof(Transform);
-    }
-
 private:
 
     // Helper for updating matrices

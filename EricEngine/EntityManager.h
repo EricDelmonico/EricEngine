@@ -24,7 +24,6 @@ namespace ECS
     struct Component
     {
         virtual int ID() { return INVALID_COMPONENT; }
-        virtual int Size() { throw; }
         virtual ~Component() {}
     };
 
@@ -46,17 +45,17 @@ namespace ECS
         // Initializes this entity manager
         EntityManager();
 
-    public:
-        ~EntityManager();
-
         static int numComponentTypes;
-
-        bool entities[MAX_ENTITIES];
-        int entityCount;
 
         // Keep track of where valid components actually are so we
         // can iterate through them
         std::vector<std::vector<int>> componentEntityIDs;
+
+    public:
+        ~EntityManager();
+
+        bool entities[MAX_ENTITIES];
+        int entityCount;
 
         // ComponentContainer Singleton
         static EntityManager& GetInstance();
@@ -71,8 +70,7 @@ namespace ECS
 
         int GetComponentSizeFromID(int componentID);
 
-        // Adds component of type ComponentType to the entity. componentID is used
-        // to stick the component into the entity structs components array
+        // Adds component of type ComponentType to the entity.
         template <class ComponentType>
         void AddComponent(int id, ComponentType* component);
 
@@ -142,15 +140,20 @@ namespace ECS
             }
         }
 
-        // Handle set intersection
+        // Get vectors for entity id's of each component type
         vectorsToIntersect.clear();
         boost::mp11::tuple_for_each(types, [&](const auto& type) {
+            // Cast the type to a component
             Component* comp = static_cast<Component*>((void*)(&type));
+            // Make sure the component is valid, then push entity id
+            // vector for that component to the vectorsToIntersect vector
             int id = comp->ID();
             assert(id != INVALID_COMPONENT); // Type MUST be a component
             vectorsToIntersect.push_back(&componentEntityIDs[id]);
         });
 
+        // Intersect the vectors. We only want the entity id's
+        // for entities with ALL of the passed in components.
         std::vector<int> prevVec = *vectorsToIntersect[0];
         for (int i = 1; i < vectorsToIntersect.size(); i++)
         {

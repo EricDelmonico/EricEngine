@@ -36,9 +36,4 @@ struct Material : ECS::Component
     {
         return id;
     }
-
-    virtual int Size()
-    {
-        return sizeof(Material);
-    }
 };

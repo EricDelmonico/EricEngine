@@ -11,9 +11,6 @@ public:
     SceneEditor(SceneLoader* sceneLoader, AssetManager* assetManager);
 
     void Update(float dt);
-    bool DisplayMeshDropdown();
-    bool DisplayTextureDropdown(std::string dropdownName, std::string* dataString);
-    void ReplaceMaterial(int entity, Material* newMat);
 
 private:
     SceneLoader* sceneLoader;
@@ -44,5 +41,8 @@ private:
 
     void SelectedEntityUI();
     void DisplayEntityComponents(int e);
+    bool DisplayMeshDropdown();
+    bool DisplayTextureDropdown(std::string dropdownName, std::string* dataString);
+    void ReplaceMaterial(int entity, Material* newMat);
 };
 

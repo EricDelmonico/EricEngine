@@ -16,10 +16,5 @@ struct Light : ECS::Component
     {
         return id;
     }
-
-    virtual int Size()
-    {
-        return sizeof(Light);
-    }
 };
 

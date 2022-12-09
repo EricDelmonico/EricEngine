@@ -34,9 +34,4 @@ struct Mesh : ECS::Component
     {
         return id;
     }
-
-    virtual int Size()
-    {
-        return sizeof(Mesh);
-    }
 };

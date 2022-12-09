@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Material.h"
 #include "RaycastObject.h"
+#include "Input.h"
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -104,6 +105,14 @@ void Raycasting::Update(float dt)
     // No intersection
     if (closestEntity == INVALID_ENTITY) return;
 
+#if _DEBUG
     Material* mat = em.GetComponent<Material>(closestEntity);
     mat->tint = { .5f, 0.2f, 0.2f };
+#else
+    // If we click on the closest entity, destroy it
+    if (Input::GetInstance().MouseLeftPress())
+    {
+        em.DeregisterEntity(closestEntity);
+    }
+#endif
 }
