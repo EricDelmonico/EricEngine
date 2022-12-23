@@ -34,6 +34,9 @@ private:
 
     DirectX::XMFLOAT3 dir = { 0, 0, 0 };
     DirectX::XMFLOAT3 color = { 0, 0, 0 };
+    DirectX::XMFLOAT3 lightPos = { 0, 0, 0 };
+    float range = 1.0f;
+    int lightType = 0;
     float intensity;
 
     std::string selectedTexture = "black_roughness.png";

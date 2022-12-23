@@ -3,13 +3,24 @@
 #include "EntityManager.h"
 #include <DirectXMath.h>
 
-struct Light : ECS::Component
+#define DIRECTIONAL_LIGHT 0
+#define POINT_LIGHT 1
+
+struct Light
 {
     DirectX::XMFLOAT3 dir;
-    DirectX::XMFLOAT3 color;
     float intensity;
+    DirectX::XMFLOAT3 color;
+    int lightType;
+    DirectX::XMFLOAT3 pos;
+    float range;
+};
 
-    virtual ~Light() {}
+struct LightComponent : ECS::Component
+{
+    Light data = {};
+
+    virtual ~LightComponent() {}
 
     static int id;
     virtual int ID()

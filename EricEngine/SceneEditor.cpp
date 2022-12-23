@@ -131,8 +131,8 @@ void SceneEditor::SelectedEntityUI()
     Transform* transform = nullptr;
     if (em->EntityHasComponent(Transform::id, selectedEntity)) transform = em->GetComponent<Transform>(selectedEntity);
 
-    Light* light = nullptr;
-    if (em->EntityHasComponent(Light::id, selectedEntity)) light = em->GetComponent<Light>(selectedEntity);
+    LightComponent* light = nullptr;
+    if (em->EntityHasComponent(LightComponent::id, selectedEntity)) light = em->GetComponent<LightComponent>(selectedEntity);
 
     RaycastObject* ro = nullptr;
     if (em->EntityHasComponent(RaycastObject::id, selectedEntity)) ro = em->GetComponent<RaycastObject>(selectedEntity);
@@ -226,19 +226,25 @@ void SceneEditor::SelectedEntityUI()
     {
         if (ImGui::TreeNode("Light Component"))
         {
+            ImGui::DragInt("Light Type: ", &lightType, 1, 0, 1);
             ImGui::DragFloat3("Dir: ", &dir.x, 3.14f / 360);
             ImGui::ColorPicker3("Color: ", &color.x);
             ImGui::DragFloat("Intensity: ", &intensity, 0.05f);
+            ImGui::DragFloat3("Position: ", &lightPos.x, 0.05f);
+            ImGui::DragFloat("Range: ", &range, 0.1f);
 
             if (ImGui::Button("Add Light"))
             {
-                Light* light = new Light();
+                LightComponent* light = new LightComponent();
 
-                light->dir = dir;
-                light->color = color;
-                light->intensity = intensity;
+                light->data.lightType = lightType;
+                light->data.dir = dir;
+                light->data.color = color;
+                light->data.intensity = intensity;
+                light->data.pos = lightPos;
+                light->data.range = range;
 
-                em->AddComponent<Light>(selectedEntity, light);
+                em->AddComponent<LightComponent>(selectedEntity, light);
             }
             ImGui::TreePop();
         }
@@ -265,8 +271,8 @@ void SceneEditor::DisplayEntityComponents(int e)
     Transform* transform = nullptr;
     if (em->EntityHasComponent(Transform::id, e)) transform = em->GetComponent<Transform>(e);
 
-    Light* light = nullptr;
-    if (em->EntityHasComponent(Light::id, e)) light = em->GetComponent<Light>(e);
+    LightComponent* light = nullptr;
+    if (em->EntityHasComponent(LightComponent::id, e)) light = em->GetComponent<LightComponent>(e);
 
     RaycastObject* ro = nullptr;
     if (em->EntityHasComponent(RaycastObject::id, e)) ro = em->GetComponent<RaycastObject>(e);
@@ -365,27 +371,46 @@ void SceneEditor::DisplayEntityComponents(int e)
     {
         if (ImGui::TreeNode("Light"))
         {
-            auto dir = light->dir;
+            auto lightType = light->data.lightType;
+            if (ImGui::DragInt("Light Type: ", &lightType, 1, 0, 1))
+            {
+                light->data.lightType = lightType;
+            }
+
+            auto dir = light->data.dir;
             if (ImGui::DragFloat3("Dir: ", &dir.x, 3.14f / 360))
             {
-                light->dir = dir;
+                light->data.dir = dir;
             }
 
-            auto color = light->color;
+            auto color = light->data.color;
             if (ImGui::ColorPicker3("Color: ", &color.x))
             {
-                light->color = color;
+                light->data.color = color;
             }
 
-            auto intensity = light->intensity;
+            auto intensity = light->data.intensity;
             if (ImGui::DragFloat("Intensity: ", &intensity, 0.05f))
             {
-                light->intensity = intensity;
+                light->data.intensity = intensity;
             }
+
+            auto pos = light->data.pos;
+            if (ImGui::DragFloat3("Position: ", &pos.x, 0.05f))
+            {
+                light->data.pos = pos;
+            }
+
+            auto range = light->data.range;
+            if (ImGui::DragFloat("Range: ", &range, 0.1f))
+            {
+                light->data.range = range;
+            }
+
 
             if (ImGui::Button("Remove Light"))
             {
-                em->RemoveComponent<Light>(e);
+                em->RemoveComponent<LightComponent>(e);
             }
             ImGui::TreePop();
         }

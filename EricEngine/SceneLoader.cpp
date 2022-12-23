@@ -30,7 +30,7 @@ void SceneLoader::SaveScene(std::string name)
         Material* material = em->GetComponent<Material>(i);
         Camera* camera = em->GetComponent<Camera>(i);
         Transform* transform = em->GetComponent<Transform>(i);
-        Light* light = em->GetComponent<Light>(i);
+        LightComponent* light = em->GetComponent<LightComponent>(i);
         RaycastObject* ro = em->GetComponent<RaycastObject>(i);
 
         if (mesh != nullptr) components++;
@@ -46,7 +46,7 @@ void SceneLoader::SaveScene(std::string name)
         WriteComponent<Material>(material, os);
         WriteComponent<Camera>(camera, os);
         WriteComponent<Transform>(transform, os);
-        WriteComponent<Light>(light, os);
+        WriteComponent<LightComponent>(light, os);
         WriteComponent<RaycastObject>(ro, os);
     }
 
@@ -165,12 +165,15 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
         return cam;
     }
 
-    if (componentID == Light::id)
+    if (componentID == LightComponent::id)
     {
-        Light* light = new Light();
-        in.read((char*)(&light->dir), sizeof(DirectX::XMFLOAT3));
-        in.read((char*)(&light->color), sizeof(DirectX::XMFLOAT3));
-        in.read((char*)(&light->intensity), sizeof(float));
+        LightComponent* light = new LightComponent{};
+        in.read((char*)(&light->data.lightType), sizeof(int));
+        in.read((char*)(&light->data.dir), sizeof(DirectX::XMFLOAT3));
+        in.read((char*)(&light->data.color), sizeof(DirectX::XMFLOAT3));
+        in.read((char*)(&light->data.intensity), sizeof(float));
+        in.read((char*)(&light->data.pos), sizeof(DirectX::XMFLOAT3));
+        in.read((char*)(&light->data.range), sizeof(float));
         return light;
     }
 

@@ -135,14 +135,17 @@ inline void SceneLoader::WriteComponent<Material>(Material* material, std::ofstr
 }
 
 template <>
-inline void SceneLoader::WriteComponent<Light>(Light* light, std::ofstream& os)
+inline void SceneLoader::WriteComponent<LightComponent>(LightComponent* light, std::ofstream& os)
 {
     if (light == nullptr) return;
 
-    os.write((char*)(&Light::id), sizeof(int));
-    os.write((char*)(&light->dir), sizeof(DirectX::XMFLOAT3));
-    os.write((char*)(&light->color), sizeof(DirectX::XMFLOAT3));
-    os.write((char*)(&light->intensity), sizeof(float));
+    os.write((char*)(&LightComponent::id), sizeof(int));
+    os.write((char*)(&light->data.lightType), sizeof(int));
+    os.write((char*)(&light->data.dir), sizeof(DirectX::XMFLOAT3));
+    os.write((char*)(&light->data.color), sizeof(DirectX::XMFLOAT3));
+    os.write((char*)(&light->data.intensity), sizeof(float));
+    os.write((char*)(&light->data.pos), sizeof(DirectX::XMFLOAT3));
+    os.write((char*)(&light->data.range), sizeof(float));
 }
 
 template <>

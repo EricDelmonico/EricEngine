@@ -141,7 +141,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     EntityManager::RegisterNewComponentType<Transform>();
     EntityManager::RegisterNewComponentType<Material>();
     EntityManager::RegisterNewComponentType<Camera>();
-    EntityManager::RegisterNewComponentType<Light>();
+    EntityManager::RegisterNewComponentType<LightComponent>();
     EntityManager::RegisterNewComponentType<RaycastObject>();
 
     // Create and initialize D3D11

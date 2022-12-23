@@ -11,8 +11,11 @@
 #include "ExternalShaderData.h"
 #include "Camera.h"
 #include "EntityManager.h"
+#include "Light.h"
 
 #pragma comment (lib, "d3d11.lib")
+
+#define MAX_LIGHTS 10
 
 class Renderer
 {
@@ -24,5 +27,6 @@ public:
 private:
     std::shared_ptr<D3DResources> m_d3dResources;
     AssetManager* m_assetManager;
+    Light lights[MAX_LIGHTS] = {};
 };
 

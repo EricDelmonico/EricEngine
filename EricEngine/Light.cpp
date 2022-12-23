@@ -1,3 +1,3 @@
 #include "Light.h"
 
-int Light::id;
+int LightComponent::id;

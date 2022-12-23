@@ -44,10 +44,11 @@ void Renderer::Render()
     Camera* camera = em.GetComponent<Camera>(cameraIndex);
 
     // Grab our light(s)
-    auto lightEntities = em.GetEntitiesWithComponents<Light>();
-    int lightIndex = 0;
-    if (lightEntities.size() != 0) lightIndex = lightEntities[0];
-    Light* light = em.GetComponent<Light>(lightIndex);
+    auto lightEntities = em.GetEntitiesWithComponents<LightComponent>();
+    for (int i = 0; i < lightEntities.size() && i < MAX_LIGHTS; i++)
+    {
+        lights[i] = em.GetComponent<LightComponent>(lightEntities[i])->data;
+    }
 
     for (auto& i : meshTransformIDs)
     {
@@ -62,11 +63,9 @@ void Renderer::Render()
         pixelShader->SetSamplerState("BasicSampler", material->samplerState);
         pixelShader->SetFloat3("camPosition", camera->GetTransform()->GetPosition());
         pixelShader->SetFloat3("tint", material->tint);
-        if (light != nullptr)
+        if (lights != nullptr)
         {
-            pixelShader->SetFloat3("sunDir", light->dir);
-            pixelShader->SetFloat3("sunColor", light->color);
-            pixelShader->SetFloat("sunIntensity", light->intensity);
+            pixelShader->SetData("lights", &lights, sizeof(Light) * MAX_LIGHTS);
         }
         pixelShader->CopyAllBufferData();
 
