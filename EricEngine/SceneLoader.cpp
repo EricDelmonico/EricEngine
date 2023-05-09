@@ -85,34 +85,6 @@ void SceneLoader::LoadScene(std::string name)
             // Read in the component itself
             ECS::Component* component = ReadComponent(in, componentID);
 
-            // Convert OldCameras into Camera/Transform combo
-            if (component->ID() == OldCamera::id)
-            {
-                OldCamera* oldCam = (OldCamera*)component;
-
-                Camera* cam = new Camera();
-                cam->movementSpeed = oldCam->GetMoveSpeed();
-                cam->mouseLookSpeed = oldCam->GetLookSpeed();
-                cam->fieldOfView = oldCam->GetFoV();
-                cam->aspectRatio = oldCam->GetAspectRatio();
-                cam->perspective = oldCam->IsPerspective();
-                cam->orthoSize = oldCam->GetOrthoSize();
-                em->AddComponent<Camera>(e, cam);
-
-                Transform* oldCamTransform = oldCam->GetTransform();
-                Transform* camTransform = new Transform();
-                camTransform->position = oldCamTransform->position;
-                camTransform->pitchYawRoll = oldCamTransform->pitchYawRoll;
-                camTransform->scale = oldCamTransform->scale;
-                camTransform->worldMatrix = oldCamTransform->worldMatrix;
-                camTransform->worldInverseTransposeMatrix = oldCamTransform->worldInverseTransposeMatrix;
-                camTransform->matricesDirty = oldCamTransform->matricesDirty;
-                em->AddComponent<Transform>(e, camTransform);
-
-                delete oldCam;
-                continue;
-            }
-
             // Add the component to its entity
             em->AddComponent(componentID, e, component);
         }
@@ -154,32 +126,6 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
         material->vertexShaderName = ReadWString(in);
 
         return material;
-    }
-
-    if (componentID == OldCamera::id)
-    {
-        float floatParams[11];
-        bool perspective;
-
-        for (int i = 0; i < 11; i++)
-        {
-            in.read((char*)(&(floatParams[i])), sizeof(float));
-        }
-        in.read((char*)(&perspective), sizeof(bool));
-        auto cam = new OldCamera(
-            floatParams[0],     // x
-            floatParams[1],     // y
-            floatParams[2],     // z
-            floatParams[3],     // moveSpeed
-            floatParams[4],     // lookSpeed
-            floatParams[5],     // fov
-            floatParams[6],     // aspectRatio
-            perspective,        // perspective
-            floatParams[7],     // orthoSize
-            floatParams[8],     // pitch
-            floatParams[9],     // yaw
-            floatParams[10]);   // roll
-        return cam;
     }
 
     if (componentID == Camera::id)

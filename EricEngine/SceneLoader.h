@@ -10,7 +10,6 @@
 #include "Transform.h"
 #include "Material.h"
 #include "Camera.h"
-#include "OldCamera.h"
 #include "Light.h"
 
 #include "EntityManager.h"
@@ -76,13 +75,6 @@ inline void SceneLoader::WriteComponent(ComponentType* component, std::ofstream&
 
     // By default, just write the component ID
     os.write((char*)(&ComponentType::id), sizeof(int));
-}
-
-// Do not allow OldCamera to be written
-template <>
-inline void SceneLoader::WriteComponent<OldCamera>(OldCamera* oldCamera, std::ofstream& os)
-{
-    throw;
 }
 
 template <>

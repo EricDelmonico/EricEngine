@@ -11,7 +11,6 @@
 #include "Renderer.h"
 #include "Input.h"
 #include "Camera.h"
-#include "OldCamera.h"
 #include "Material.h"
 #include "Light.h"
 #include "SceneLoader.h"
@@ -141,10 +140,9 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     EntityManager::RegisterNewComponentType<Mesh>();
     EntityManager::RegisterNewComponentType<Transform>();
     EntityManager::RegisterNewComponentType<Material>();
-    EntityManager::RegisterNewComponentType<OldCamera>();
+    EntityManager::RegisterNewComponentType<Camera>();
     EntityManager::RegisterNewComponentType<LightComponent>();
     EntityManager::RegisterNewComponentType<RaycastObject>();
-    EntityManager::RegisterNewComponentType<Camera>();
 
     // Create and initialize D3D11
     std::shared_ptr<D3DResources> d3dResources = std::make_shared<D3DResources>(WIDTH, HEIGHT);

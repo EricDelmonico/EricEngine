@@ -102,9 +102,6 @@
     <ClCompile Include="RaycastObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OldCamera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3DResources.h">
@@ -192,9 +189,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RaycastObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OldCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
