@@ -2,6 +2,7 @@
 #include "Input.h"
 #include <DirectXMath.h>
 #include "EntityManager.h"
+#include "TransformSystem.h"
 
 using namespace DirectX;
 using namespace ECS;
@@ -23,8 +24,8 @@ CameraControl::CameraControl(HWND hWnd, int windowWidth, int windowHeight)
 
 void CameraControl::UpdateViewMatrix(Camera* c, Transform* t)
 {
-    XMFLOAT3 pos = t->GetPosition();
-    XMFLOAT3 forward = t->GetForward();
+    XMFLOAT3 pos = t->position;
+    XMFLOAT3 forward = t->forward;
 
     XMMATRIX v = XMMatrixLookToRH(
         XMLoadFloat3(&pos),         // OldCamera's position
@@ -73,23 +74,23 @@ void CameraControl::Update(float dt)
     float speed = cam->movementSpeed * dt;
 
     // Movement
-    auto forward = transform->GetForward();
+    auto forward = transform->forward;
     forward.y = 0;
     auto forwardNoY = XMVector3Normalize(XMLoadFloat3(&forward));
     XMStoreFloat3(&forward, forwardNoY);
     if (input.KeyDown(VK_LSHIFT)) { speed *= 2; }
 #if _DEBUG
-    if (input.KeyDown('W')) { transform->MoveRelative(0, 0, -speed); }
-    if (input.KeyDown('S')) { transform->MoveRelative(0, 0, speed); }
+    if (input.KeyDown('W')) { TransformSystem::MoveRelative(transform, 0, 0, -speed); }
+    if (input.KeyDown('S')) { TransformSystem::MoveRelative(transform, 0, 0, speed); }
 #else
     // take away free fly in release mode
     if (input.KeyDown('W')) { cam->transform.MoveAbsolute(forward.x * -speed, 0, forward.z * -speed); }
     if (input.KeyDown('S')) { cam->transform.MoveAbsolute(forward.x * speed, 0, forward.z * speed); }
 #endif
-    if (input.KeyDown('A')) { transform->MoveRelative(speed, 0, 0); }
-    if (input.KeyDown('D')) { transform->MoveRelative(-speed, 0, 0); }
-    if (input.KeyDown('E')) { transform->MoveAbsolute(0, speed, 0); }
-    if (input.KeyDown('Q')) { transform->MoveAbsolute(0, -speed, 0); }
+    if (input.KeyDown('A')) { TransformSystem::MoveRelative(transform, speed, 0, 0); }
+    if (input.KeyDown('D')) { TransformSystem::MoveRelative(transform, -speed, 0, 0); }
+    if (input.KeyDown('E')) { TransformSystem::MoveAbsolute(transform, 0, speed, 0); }
+    if (input.KeyDown('Q')) { TransformSystem::MoveAbsolute(transform, 0, -speed, 0); }
     if (input.KeyDown('P')) { sensitivity += 0.1f * dt; }
     if (input.KeyDown('L')) { sensitivity -= 0.1f * dt; }
 
@@ -112,7 +113,7 @@ void CameraControl::Update(float dt)
 #endif
 
         // Don't allow pitch to go more than 90 degrees or less than -90 degrees
-        XMFLOAT3 pitchYawRoll = transform->GetPitchYawRoll();
+        XMFLOAT3 pitchYawRoll = transform->pitchYawRoll;
         if (pitchYawRoll.x + yDiff > DirectX::XM_PIDIV2 - 0.05f ||
             pitchYawRoll.x + yDiff < -DirectX::XM_PIDIV2 + 0.05f)
         {
@@ -120,11 +121,11 @@ void CameraControl::Update(float dt)
         }
 
         // Rotate the transform! SWAP X AND Y!
-        transform->Rotate(yDiff, xDiff, 0);
+        TransformSystem::Rotate(transform, yDiff, xDiff, 0);
     }
 
-    auto pos = transform->GetPosition();
-    transform->SetPosition(pos.x, pos.y, pos.z);
+    auto pos = transform->position;
+    TransformSystem::SetPosition(transform, pos.x, pos.y, pos.z);
 
     // At the end, update the view
     UpdateViewMatrix(cam, transform);

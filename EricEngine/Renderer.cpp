@@ -70,7 +70,7 @@ void Renderer::Render()
         pixelShader->SetShaderResourceView("Roughness", m_assetManager->GetTexture(material->roughnessName));
         pixelShader->SetShaderResourceView("AO", m_assetManager->GetTexture(material->aoName));
         pixelShader->SetSamplerState("BasicSampler", m_assetManager->GetSamplerState());
-        pixelShader->SetFloat3("camPosition", cameraTransform->GetPosition());
+        pixelShader->SetFloat3("camPosition", cameraTransform->position);
         pixelShader->SetFloat3("tint", material->tint);
         if (lights != nullptr)
         {
@@ -84,8 +84,8 @@ void Renderer::Render()
         vertexShader->SetShader();
         vertexShader->SetMatrix4x4("view", camera->viewMatrix);
         vertexShader->SetMatrix4x4("projection", camera->projectionMatrix);
-        vertexShader->SetMatrix4x4("model", transform->GetWorldMatrix());
-        vertexShader->SetMatrix4x4("modelInvTranspose", transform->GetWorldInverseTransposeMatrix());
+        vertexShader->SetMatrix4x4("model", transform->worldMatrix);
+        vertexShader->SetMatrix4x4("modelInvTranspose", transform->worldInverseTransposeMatrix);
         vertexShader->CopyAllBufferData();
 
         Mesh* mesh = em.GetComponent<Mesh>(i);

@@ -18,6 +18,7 @@
 #include "CameraControl.h"
 #include "Raycasting.h"
 #include "RaycastObject.h"
+#include "TransformSystem.h"
 
 #include <Windows.h>
 #include <memory>
@@ -162,6 +163,8 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     SceneEditor sceneEditor(sceneLoader, assetManager);
 #endif
 
+    TransformSystem transformSystem;
+
     // Create Camera
     Camera* camera = new Camera();
     camera->movementSpeed = 10;
@@ -170,7 +173,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     camera->aspectRatio = 16.0f / 9.0f;
     camera->orthoSize = 2.5f;
     Transform* camTransform = new Transform();
-    camTransform->SetPosition(0, 20, 30);
+    TransformSystem::SetPosition(camTransform, 0, 20, 30);
 
     // ---------------- initialize systems ----------------
     std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, assetManager);
@@ -223,6 +226,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
 #endif
 
             // ------------------ update systems ------------------
+            transformSystem.Update(dt);
             camControl.Update(dt);
             raycasting.Update(dt);
             renderer->Render();

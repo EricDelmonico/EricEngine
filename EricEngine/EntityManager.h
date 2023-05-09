@@ -31,7 +31,6 @@ namespace ECS
     {
     private:
         std::vector<std::vector<int>*> vectorsToIntersect;
-        static std::unordered_map<int, int> componentTypeSizes;
 
         static EntityManager* instance;
 
@@ -68,8 +67,6 @@ namespace ECS
         // Clears out all entities
         void DeregisterAllEntities();
 
-        int GetComponentSizeFromID(int componentID);
-
         // Adds component of type ComponentType to the entity.
         template <class ComponentType>
         void AddComponent(int id, ComponentType* component);
@@ -86,6 +83,9 @@ namespace ECS
 
         template <class... ComponentTypes>
         std::vector<int> GetEntitiesWithComponents();
+
+        template <class ComponentType>
+        std::vector<Component*> GetAllComponentsOfType() { return components[ComponentType::id]; }
 
         template <class ComponentType>
         static void RegisterNewComponentType();
@@ -171,6 +171,5 @@ namespace ECS
     static inline void EntityManager::RegisterNewComponentType()
     {
         ComponentType::id = numComponentTypes++;
-        componentTypeSizes.insert({ ComponentType::id, sizeof(ComponentType) });
     }
 }

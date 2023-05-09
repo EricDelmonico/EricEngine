@@ -3,7 +3,6 @@
 using namespace ECS;
 
 EntityManager* EntityManager::instance;
-std::unordered_map<int, int> EntityManager::componentTypeSizes;
 int EntityManager::numComponentTypes;
 
 int ECS::EntityManager::GetID()
@@ -104,13 +103,6 @@ void ECS::EntityManager::DeregisterAllEntities()
         // Deregister each entity that exists
         if (entities[i]) DeregisterEntity(i);
     }
-}
-
-int ECS::EntityManager::GetComponentSizeFromID(int componentID)
-{
-    if (componentID < 0 || componentID >= numComponentTypes) throw;
-
-    return componentTypeSizes[componentID];
 }
 
 void ECS::EntityManager::AddComponent(int componentID, int entityID, Component* component)

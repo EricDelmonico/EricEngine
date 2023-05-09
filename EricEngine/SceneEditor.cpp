@@ -7,6 +7,7 @@
 #include "RaycastObject.h"
 #include "DirectoryEnumeration.h"
 #include "StringConversion.h"
+#include "TransformSystem.h"
 
 // ImGui
 #include "ImGui/imgui.h"
@@ -206,9 +207,9 @@ void SceneEditor::SelectedEntityUI()
         {
             Transform* transform = new Transform();
 
-            transform->SetPosition(pos.x, pos.y, pos.z);
-            transform->SetScale(scale.x, scale.y, scale.z);
-            transform->SetPitchYawRoll(pitchYawRoll.x, pitchYawRoll.y, pitchYawRoll.z);
+            TransformSystem::SetPosition(transform, pos.x, pos.y, pos.z);
+            TransformSystem::SetScale(transform, scale.x, scale.y, scale.z);
+            TransformSystem::SetPitchYawRoll(transform, pitchYawRoll.x, pitchYawRoll.y, pitchYawRoll.z);
 
             em->AddComponent<Transform>(selectedEntity, transform);
         }
@@ -325,22 +326,22 @@ void SceneEditor::DisplayEntityComponents(int e)
     {
         if (ImGui::TreeNode("Transform"))
         {
-            auto position = transform->GetPosition();
+            auto position = transform->position;
             if (ImGui::DragFloat3("Position: ", &position.x, 0.05f))
             {
-                transform->SetPosition(position.x, position.y, position.z);
+                TransformSystem::SetPosition(transform, position.x, position.y, position.z);
             }
 
-            auto scale = transform->GetScale();
+            auto scale = transform->scale;
             if (ImGui::DragFloat3("Scale: ", &scale.x, 0.05f))
             {
-                transform->SetScale(scale.x, scale.y, scale.z);
+                TransformSystem::SetScale(transform, scale.x, scale.y, scale.z);
             }
 
-            auto pitchYawRoll = transform->GetPitchYawRoll();
+            auto pitchYawRoll = transform->pitchYawRoll;
             if (ImGui::DragFloat3("PitchYawRoll: ", &pitchYawRoll.x, 3.14f / 360.0f))
             {
-                transform->SetPitchYawRoll(pitchYawRoll.x, pitchYawRoll.y, pitchYawRoll.z);
+                TransformSystem::SetPitchYawRoll(transform, pitchYawRoll.x, pitchYawRoll.y, pitchYawRoll.z);
             }
 
             if (ImGui::Button("Remove Transform"))

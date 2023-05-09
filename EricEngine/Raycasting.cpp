@@ -27,8 +27,8 @@ void Raycasting::Update(float dt)
     float mint = -1;
     float maxt = -1;
 
-    XMFLOAT3 origin = cam->GetPosition();
-    XMFLOAT3 direction = cam->GetForward();
+    XMFLOAT3 origin = cam->position;
+    XMFLOAT3 direction = cam->forward;
 
     float closestHit = INFINITY;
     int closestEntity = INVALID_ENTITY;
@@ -51,7 +51,7 @@ void Raycasting::Update(float dt)
             auto scale = transform->scale;
             auto pitchYawRoll = transform->pitchYawRoll;
 
-            auto worldMat = transform->GetWorldMatrix();
+            auto worldMat = transform->worldMatrix;
             XMMATRIX invMat = XMMatrixInverse(0, XMLoadFloat4x4(&worldMat));
 
             // Apply in reverse order

@@ -155,6 +155,7 @@
     <ClCompile Include="SimpleShader.cpp" />
     <ClCompile Include="StringConversion.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="TransformSystem.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +186,7 @@
     <ClInclude Include="SimpleShader.h" />
     <ClInclude Include="StringConversion.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="TransformSystem.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
