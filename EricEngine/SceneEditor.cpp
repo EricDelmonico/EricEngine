@@ -191,14 +191,6 @@ void SceneEditor::SelectedEntityUI()
             }
             else
             {
-                material->albedo = albedo;
-                material->normals = normals;
-                material->metalness = metalness;
-                material->roughness = roughness;
-                material->ao = ao;
-                material->pixelShader = ps;
-                material->vertexShader = vs;
-                material->samplerState = assetManager->GetSamplerState();
                 em->AddComponent<Material>(selectedEntity, material);
             }
         }
@@ -315,15 +307,6 @@ void SceneEditor::DisplayEntityComponents(int e)
                 mat->aoName = material->aoName;
                 mat->pixelShaderName = material->pixelShaderName;
                 mat->vertexShaderName = material->vertexShaderName;
-                mat->samplerState = material->samplerState;
-
-                mat->albedo = assetManager->GetTexture(mat->albedoName);
-                mat->normals = assetManager->GetTexture(mat->normalsName);
-                mat->metalness = assetManager->GetTexture(mat->metalnessName);
-                mat->roughness = assetManager->GetTexture(mat->roughnessName);
-                mat->ao = assetManager->GetTexture(mat->aoName);
-                mat->pixelShader = assetManager->GetPixelShader(mat->pixelShaderName);
-                mat->vertexShader = assetManager->GetVertexShader(mat->vertexShaderName);
 
                 ReplaceMaterial(e, mat);
                 ImGui::TreePop();

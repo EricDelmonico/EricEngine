@@ -125,17 +125,6 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
         material->pixelShaderName = ReadWString(in);
         material->vertexShaderName = ReadWString(in);
 
-        material->albedo = am->GetTexture(material->albedoName);
-        material->metalness = am->GetTexture(material->metalnessName);
-        material->normals = am->GetTexture(material->normalsName);
-        material->roughness = am->GetTexture(material->roughnessName);
-        material->ao = am->GetTexture(material->aoName);
-
-        material->pixelShader = am->GetPixelShader(material->pixelShaderName);
-        material->vertexShader = am->GetVertexShader(material->vertexShaderName);
-
-        material->samplerState = am->GetSamplerState();
-
         return material;
     }
 

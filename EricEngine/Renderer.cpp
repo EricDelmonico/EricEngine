@@ -53,14 +53,14 @@ void Renderer::Render()
     for (auto& i : meshTransformIDs)
     {
         Material* material = em.GetComponent<Material>(i);
-        auto pixelShader = material->pixelShader;
+        auto pixelShader = m_assetManager->GetPixelShader(material->pixelShaderName);
         pixelShader->SetShader();
-        pixelShader->SetShaderResourceView("Albedo", material->albedo);
-        pixelShader->SetShaderResourceView("Normals", material->normals);
-        pixelShader->SetShaderResourceView("Metalness", material->metalness);
-        pixelShader->SetShaderResourceView("Roughness", material->roughness);
-        pixelShader->SetShaderResourceView("AO", material->ao);
-        pixelShader->SetSamplerState("BasicSampler", material->samplerState);
+        pixelShader->SetShaderResourceView("Albedo", m_assetManager->GetTexture(material->albedoName));
+        pixelShader->SetShaderResourceView("Normals", m_assetManager->GetTexture(material->normalsName));
+        pixelShader->SetShaderResourceView("Metalness", m_assetManager->GetTexture(material->metalnessName));
+        pixelShader->SetShaderResourceView("Roughness", m_assetManager->GetTexture(material->roughnessName));
+        pixelShader->SetShaderResourceView("AO", m_assetManager->GetTexture(material->aoName));
+        pixelShader->SetSamplerState("BasicSampler", m_assetManager->GetSamplerState());
         pixelShader->SetFloat3("camPosition", camera->GetTransform()->GetPosition());
         pixelShader->SetFloat3("tint", material->tint);
         if (lights != nullptr)
@@ -71,7 +71,7 @@ void Renderer::Render()
 
         // Set up cbuffer data
         Transform* transform = em.GetComponent<Transform>(i);
-        auto vertexShader = material->vertexShader;
+        auto vertexShader = m_assetManager->GetVertexShader(material->vertexShaderName);
         vertexShader->SetShader();
         vertexShader->SetMatrix4x4("view", camera->GetView());
         vertexShader->SetMatrix4x4("projection", camera->GetProjection());
