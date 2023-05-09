@@ -139,8 +139,8 @@ Mesh* AssetManager::GetMesh(std::string name)
 
         m_loadedMeshes.insert({ name, Mesh() });
         auto& mesh = m_loadedMeshes[name];
-        mesh.vertexBuffer = vb;
-        mesh.indexBuffer = ib;
+        m_loadedVertexBuffers.insert({name, vb});
+        m_loadedIndexBuffers.insert({name, ib});
         mesh.indices = numIndices;
         mesh.boundingMax = max;
         mesh.boundingMin = min;
@@ -179,4 +179,14 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AssetManager::GetTexture(std::s
         // Texture failed to load :(
         return nullptr;
     }
+}
+
+Microsoft::WRL::ComPtr<ID3D11Buffer> AssetManager::GetIndexBuffer(std::string name)
+{
+    return m_loadedIndexBuffers[name];
+}
+
+Microsoft::WRL::ComPtr<ID3D11Buffer> AssetManager::GetVertexBuffer(std::string name)
+{
+    return m_loadedVertexBuffers[name];
 }

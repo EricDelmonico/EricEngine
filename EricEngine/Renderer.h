@@ -20,7 +20,7 @@
 class Renderer
 {
 public:
-    Renderer(std::shared_ptr<D3DResources> d3dResources);
+    Renderer(std::shared_ptr<D3DResources> d3dResources, AssetManager* assetManager);
 
     void Render();
 

@@ -12,18 +12,16 @@
 
 struct Mesh : ECS::Component
 {
-    Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
     DirectX::XMFLOAT3 boundingMax;
     DirectX::XMFLOAT3 boundingMin;
     int indices;
     std::string name;
 
-    Mesh() : vertexBuffer(nullptr), indexBuffer(nullptr), indices(0), boundingMax(), boundingMin(), name("")
+    Mesh() : indices(0), boundingMax(), boundingMin(), name("")
     {
     }
 
-    Mesh(const Mesh& other) : vertexBuffer(other.vertexBuffer), indexBuffer(other.indexBuffer), indices(other.indices), boundingMax(other.boundingMax), boundingMin(other.boundingMin), name(other.name)
+    Mesh(const Mesh& other) : indices(other.indices), boundingMax(other.boundingMax), boundingMin(other.boundingMin), name(other.name)
     {
     }
 

@@ -36,6 +36,19 @@ public:
 
     Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState() { return m_basicSamplerState; }
 
+    /// <summary>
+    /// Should only be called using a loaded Mesh's name
+    /// </summary>
+    /// <param name="name">The name of the Mesh this index buffer belongs to</param>
+    /// <returns></returns>
+    Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer(std::string name);
+    /// <summary>
+    /// Should only be called using a loaded Mesh's name
+    /// </summary>
+    /// <param name="name">The name of the Mesh this vertex buffer belongs to</param>
+    /// <returns></returns>
+    Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer(std::string name);
+
 private:
     std::shared_ptr<D3DResources> m_d3dResources;
 
@@ -45,6 +58,8 @@ private:
     std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> m_loadedTextureSRVs;
 
     std::unordered_map<std::string, Mesh> m_loadedMeshes;
+    std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>> m_loadedVertexBuffers;
+    std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>> m_loadedIndexBuffers;
 
     Microsoft::WRL::ComPtr<ID3D11SamplerState> m_basicSamplerState;
 };

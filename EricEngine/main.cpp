@@ -173,7 +173,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
         16.0f / 9.0f);  // aspectRatio
 
     // ---------------- initialize systems ----------------
-    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources);
+    std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, assetManager);
     CameraControl camControl = CameraControl(mw.GetWindow(), WIDTH, HEIGHT);
     Raycasting raycasting = Raycasting();
     // ----------------------------------------------------

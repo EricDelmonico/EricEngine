@@ -11,7 +11,7 @@
 #include "ImGui/imgui_impl_win32.h"
 #endif
 
-Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources) : m_d3dResources(d3dResources)
+Renderer::Renderer(std::shared_ptr<D3DResources> d3dResources, AssetManager* assetManager) : m_d3dResources(d3dResources), m_assetManager(assetManager)
 {
 }
 
@@ -82,8 +82,8 @@ void Renderer::Render()
         Mesh* mesh = em.GetComponent<Mesh>(i);
         UINT stride = sizeof(Vertex);
         UINT offset = 0;
-        context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
-        context->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+        context->IASetVertexBuffers(0, 1, m_assetManager->GetVertexBuffer(mesh->name).GetAddressOf(), &stride, &offset);
+        context->IASetIndexBuffer(m_assetManager->GetIndexBuffer(mesh->name).Get(), DXGI_FORMAT_R32_UINT, 0);
 
         context->DrawIndexed(mesh->indices, 0, 0);
     }
