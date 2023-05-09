@@ -59,7 +59,7 @@ void SceneLoader::LoadScene(std::string name)
 
     std::ifstream in;
     in.open(DirectoryEnumeration::GetExePath() + "../../Levels/" + name, std::ios::binary | std::ios::in);
-    
+
     int entityCount = -1;
     in.read((char*)(&entityCount), sizeof(int));
 
@@ -84,6 +84,34 @@ void SceneLoader::LoadScene(std::string name)
 
             // Read in the component itself
             ECS::Component* component = ReadComponent(in, componentID);
+
+            // Convert OldCameras into Camera/Transform combo
+            if (component->ID() == OldCamera::id)
+            {
+                OldCamera* oldCam = (OldCamera*)component;
+
+                Camera* cam = new Camera();
+                cam->movementSpeed = oldCam->GetMoveSpeed();
+                cam->mouseLookSpeed = oldCam->GetLookSpeed();
+                cam->fieldOfView = oldCam->GetFoV();
+                cam->aspectRatio = oldCam->GetAspectRatio();
+                cam->perspective = oldCam->IsPerspective();
+                cam->orthoSize = oldCam->GetOrthoSize();
+                em->AddComponent<Camera>(e, cam);
+
+                Transform* oldCamTransform = oldCam->GetTransform();
+                Transform* camTransform = new Transform();
+                camTransform->position = oldCamTransform->position;
+                camTransform->pitchYawRoll = oldCamTransform->pitchYawRoll;
+                camTransform->scale = oldCamTransform->scale;
+                camTransform->worldMatrix = oldCamTransform->worldMatrix;
+                camTransform->worldInverseTransposeMatrix = oldCamTransform->worldInverseTransposeMatrix;
+                camTransform->matricesDirty = oldCamTransform->matricesDirty;
+                em->AddComponent<Transform>(e, camTransform);
+
+                delete oldCam;
+                continue;
+            }
 
             // Add the component to its entity
             em->AddComponent(componentID, e, component);
@@ -128,7 +156,7 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
         return material;
     }
 
-    if (componentID == Camera::id)
+    if (componentID == OldCamera::id)
     {
         float floatParams[11];
         bool perspective;
@@ -138,19 +166,32 @@ ECS::Component* SceneLoader::ReadComponent(std::ifstream& in, int componentID)
             in.read((char*)(&(floatParams[i])), sizeof(float));
         }
         in.read((char*)(&perspective), sizeof(bool));
-        auto cam = new Camera(
-            floatParams[0],
-            floatParams[1],
-            floatParams[2],
-            floatParams[3],
-            floatParams[4],
-            floatParams[5],
-            floatParams[6],
-            floatParams[7],
-            perspective,
-            floatParams[8],
-            floatParams[9],
-            floatParams[10]);
+        auto cam = new OldCamera(
+            floatParams[0],     // x
+            floatParams[1],     // y
+            floatParams[2],     // z
+            floatParams[3],     // moveSpeed
+            floatParams[4],     // lookSpeed
+            floatParams[5],     // fov
+            floatParams[6],     // aspectRatio
+            perspective,        // perspective
+            floatParams[7],     // orthoSize
+            floatParams[8],     // pitch
+            floatParams[9],     // yaw
+            floatParams[10]);   // roll
+        return cam;
+    }
+
+    if (componentID == Camera::id)
+    {
+        Camera* cam = new Camera();
+        in.read((char*)(&cam->movementSpeed), sizeof(float));
+        in.read((char*)(&cam->mouseLookSpeed), sizeof(float));
+        in.read((char*)(&cam->fieldOfView), sizeof(float));
+        in.read((char*)(&cam->aspectRatio), sizeof(float));
+        in.read((char*)(&cam->perspective), sizeof(bool));
+        in.read((char*)(&cam->orthoSize), sizeof(float));
+
         return cam;
     }
 

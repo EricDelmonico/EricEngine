@@ -11,6 +11,7 @@
 #include "Renderer.h"
 #include "Input.h"
 #include "Camera.h"
+#include "OldCamera.h"
 #include "Material.h"
 #include "Light.h"
 #include "SceneLoader.h"
@@ -140,9 +141,10 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     EntityManager::RegisterNewComponentType<Mesh>();
     EntityManager::RegisterNewComponentType<Transform>();
     EntityManager::RegisterNewComponentType<Material>();
-    EntityManager::RegisterNewComponentType<Camera>();
+    EntityManager::RegisterNewComponentType<OldCamera>();
     EntityManager::RegisterNewComponentType<LightComponent>();
     EntityManager::RegisterNewComponentType<RaycastObject>();
+    EntityManager::RegisterNewComponentType<Camera>();
 
     // Create and initialize D3D11
     std::shared_ptr<D3DResources> d3dResources = std::make_shared<D3DResources>(WIDTH, HEIGHT);
@@ -163,14 +165,14 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
 #endif
 
     // Create Camera
-    Camera* camera = new Camera(
-        0,              // x
-        20,             // y
-        30,             // z
-        10,             // moveSpeed
-        1,              // lookSpeed
-        3.14f / 3.0f,   // FOV
-        16.0f / 9.0f);  // aspectRatio
+    Camera* camera = new Camera();
+    camera->movementSpeed = 10;
+    camera->mouseLookSpeed = 1;
+    camera->fieldOfView = 3.14f / 3.0f;
+    camera->aspectRatio = 16.0f / 9.0f;
+    camera->orthoSize = 2.5f;
+    Transform* camTransform = new Transform();
+    camTransform->SetPosition(0, 20, 30);
 
     // ---------------- initialize systems ----------------
     std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(d3dResources, assetManager);
@@ -184,6 +186,7 @@ HRESULT main(HINSTANCE hInstance, int nCmdShow)
     {
         int e = em->RegisterNewEntity();
         em->AddComponent(e, camera);
+        em->AddComponent(e, camTransform);
     }
 
     auto prevFrameTime = std::chrono::high_resolution_clock::now();

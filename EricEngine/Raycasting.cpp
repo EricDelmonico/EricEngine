@@ -17,9 +17,9 @@ void Raycasting::Update(float dt)
     auto entitiesWithMesh = em.GetEntitiesWithComponents<Mesh, Transform, Material, RaycastObject>();
 
     // Camera will be the source of the raycast
-    auto entitiesWithCamera = em.GetEntitiesWithComponents<Camera>();
+    auto entitiesWithCamera = em.GetEntitiesWithComponents<Camera, Transform>();
     if (entitiesWithCamera.size() <= 0) return;
-    Camera* cam = em.GetComponent<Camera>(entitiesWithCamera[0]);
+    Transform* cam = em.GetComponent<Transform>(entitiesWithCamera[0]);
 
     // Test each of the six faces of each mesh's bounding box
     float t[] = { 0, 0, 0, 0, 0, 0 };
@@ -27,8 +27,8 @@ void Raycasting::Update(float dt)
     float mint = -1;
     float maxt = -1;
 
-    XMFLOAT3 origin = cam->GetTransform()->GetPosition();
-    XMFLOAT3 direction = cam->GetTransform()->GetForward();
+    XMFLOAT3 origin = cam->GetPosition();
+    XMFLOAT3 direction = cam->GetForward();
 
     float closestHit = INFINITY;
     int closestEntity = INVALID_ENTITY;

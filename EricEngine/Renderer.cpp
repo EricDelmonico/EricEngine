@@ -37,11 +37,20 @@ void Renderer::Render()
     std::vector<int> meshTransformIDs = em.GetEntitiesWithComponents<Mesh, Transform, Material>();
 
     // Get our camera for rendering
-    auto cameras = em.GetEntitiesWithComponents<Camera>();
+    auto cameras = em.GetEntitiesWithComponents<Camera, Transform>();
     // Can't render without a camera
-    if (cameras.size() == 0) return;
+    if (cameras.size() == 0)
+    {
+#ifdef _DEBUG
+        ImGui::EndFrame();
+        ImGui::Render();
+        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+#endif
+        return;
+    }
     int cameraIndex = cameras[0];
     Camera* camera = em.GetComponent<Camera>(cameraIndex);
+    Transform* cameraTransform = em.GetComponent<Transform>(cameraIndex);
 
     // Grab our light(s)
     auto lightEntities = em.GetEntitiesWithComponents<LightComponent>();
@@ -61,7 +70,7 @@ void Renderer::Render()
         pixelShader->SetShaderResourceView("Roughness", m_assetManager->GetTexture(material->roughnessName));
         pixelShader->SetShaderResourceView("AO", m_assetManager->GetTexture(material->aoName));
         pixelShader->SetSamplerState("BasicSampler", m_assetManager->GetSamplerState());
-        pixelShader->SetFloat3("camPosition", camera->GetTransform()->GetPosition());
+        pixelShader->SetFloat3("camPosition", cameraTransform->GetPosition());
         pixelShader->SetFloat3("tint", material->tint);
         if (lights != nullptr)
         {
@@ -73,8 +82,8 @@ void Renderer::Render()
         Transform* transform = em.GetComponent<Transform>(i);
         auto vertexShader = m_assetManager->GetVertexShader(material->vertexShaderName);
         vertexShader->SetShader();
-        vertexShader->SetMatrix4x4("view", camera->GetView());
-        vertexShader->SetMatrix4x4("projection", camera->GetProjection());
+        vertexShader->SetMatrix4x4("view", camera->viewMatrix);
+        vertexShader->SetMatrix4x4("projection", camera->projectionMatrix);
         vertexShader->SetMatrix4x4("model", transform->GetWorldMatrix());
         vertexShader->SetMatrix4x4("modelInvTranspose", transform->GetWorldInverseTransposeMatrix());
         vertexShader->CopyAllBufferData();

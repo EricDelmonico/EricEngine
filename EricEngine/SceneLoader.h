@@ -10,6 +10,7 @@
 #include "Transform.h"
 #include "Material.h"
 #include "Camera.h"
+#include "OldCamera.h"
 #include "Light.h"
 
 #include "EntityManager.h"
@@ -77,33 +78,25 @@ inline void SceneLoader::WriteComponent(ComponentType* component, std::ofstream&
     os.write((char*)(&ComponentType::id), sizeof(int));
 }
 
+// Do not allow OldCamera to be written
+template <>
+inline void SceneLoader::WriteComponent<OldCamera>(OldCamera* oldCamera, std::ofstream& os)
+{
+    throw;
+}
+
 template <>
 inline void SceneLoader::WriteComponent<Camera>(Camera* camera, std::ofstream& os)
 {
     if (camera == nullptr) return;
 
-    auto position = camera->GetTransform()->GetPosition();
-    auto pitchYawRoll = camera->GetTransform()->GetPitchYawRoll();
-    auto moveSpeed = camera->GetMoveSpeed();
-    auto lookSpeed = camera->GetLookSpeed();
-    auto fov = camera->GetFoV();
-    auto aspectRatio = camera->GetAspectRatio();
-    auto perspective = camera->IsPerspective();
-    auto orthoSize = camera->GetOrthoSize();
-
     os.write((char*)(&Camera::id), sizeof(int));
-    os.write((char*)(&position.x), sizeof(float));
-    os.write((char*)(&position.y), sizeof(float));
-    os.write((char*)(&position.z), sizeof(float));
-    os.write((char*)(&moveSpeed), sizeof(float));
-    os.write((char*)(&lookSpeed), sizeof(float));
-    os.write((char*)(&fov), sizeof(float));
-    os.write((char*)(&aspectRatio), sizeof(float));
-    os.write((char*)(&orthoSize), sizeof(float));
-    os.write((char*)(&pitchYawRoll.x), sizeof(float));
-    os.write((char*)(&pitchYawRoll.y), sizeof(float));
-    os.write((char*)(&pitchYawRoll.z), sizeof(float));
-    os.write((char*)(&perspective), sizeof(bool));
+    os.write((char*)(&camera->movementSpeed), sizeof(float));
+    os.write((char*)(&camera->mouseLookSpeed), sizeof(float));
+    os.write((char*)(&camera->fieldOfView), sizeof(float));
+    os.write((char*)(&camera->aspectRatio), sizeof(float));
+    os.write((char*)(&camera->perspective), sizeof(bool));
+    os.write((char*)(&camera->orthoSize), sizeof(float));
 }
 
 template<>
