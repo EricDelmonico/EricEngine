@@ -84,8 +84,8 @@ void CameraControl::Update(float dt)
     if (input.KeyDown('S')) { TransformSystem::MoveRelative(transform, 0, 0, speed); }
 #else
     // take away free fly in release mode
-    if (input.KeyDown('W')) { cam->transform.MoveAbsolute(forward.x * -speed, 0, forward.z * -speed); }
-    if (input.KeyDown('S')) { cam->transform.MoveAbsolute(forward.x * speed, 0, forward.z * speed); }
+    if (input.KeyDown('W')) { TransformSystem::MoveAbsolute(transform, forward.x * -speed, 0, forward.z * -speed); }
+    if (input.KeyDown('S')) { TransformSystem::MoveAbsolute(transform, forward.x * speed, 0, forward.z * speed); }
 #endif
     if (input.KeyDown('A')) { TransformSystem::MoveRelative(transform, speed, 0, 0); }
     if (input.KeyDown('D')) { TransformSystem::MoveRelative(transform, -speed, 0, 0); }
