@@ -5,5 +5,7 @@ class Raycasting
 {
 public:
     void Update(float dt);
+
+    static int hitEntity;
 };
 

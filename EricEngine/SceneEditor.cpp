@@ -8,6 +8,7 @@
 #include "DirectoryEnumeration.h"
 #include "StringConversion.h"
 #include "TransformSystem.h"
+#include "Raycasting.h"
 
 // ImGui
 #include "ImGui/imgui.h"
@@ -26,21 +27,25 @@ SceneEditor::SceneEditor(SceneLoader* sceneLoader, AssetManager* assetManager)
 
 void SceneEditor::Update(float dt)
 {
-    ImGui::Begin("Editor");
+    ImGui::Begin("Inspector");
 
     std::string numEntities = "# of entities: " + std::to_string(em->entityCount);
     ImGui::Text(numEntities.c_str());
 
     ImGui::InputInt("Selected Entity: ", &selectedEntity);
+    if (ImGui::Button("Select Highlighted Entity"))
+    {
+        selectedEntity = Raycasting::hitEntity;
+    }
     if (selectedEntity < 0) selectedEntity = 0;
     if (selectedEntity >= MAX_ENTITIES) selectedEntity = MAX_ENTITIES - 1;
     // If we selected an invalid entity, find a valid one
     while (!em->entities[selectedEntity]) selectedEntity = (selectedEntity + 1) % MAX_ENTITIES;
-    if (ImGui::TreeNode("SelectedEntityComponents"))
-    {
-        SelectedEntityUI();
-        ImGui::TreePop();
-    }
+    SelectedEntityUI();
+
+    ImGui::End();
+
+    ImGui::Begin("Scene");
 
     if (ImGui::Button("Add Entity"))
     {
@@ -142,15 +147,16 @@ void SceneEditor::SelectedEntityUI()
     DisplayEntityComponents(selectedEntity);
 
     // For non-existing components--allow the user to add them
-    if (mesh == nullptr)
+    if (mesh == nullptr && ImGui::TreeNode("New Mesh Component"))
     {
         if (DisplayMeshDropdown())
         {
             em->AddComponent<Mesh>(selectedEntity, assetManager->GetMesh(selectedMesh));
         }
+        ImGui::TreePop();
     }
 
-    if (material == nullptr)
+    if (material == nullptr && ImGui::TreeNode("New Material Component"))
     {
         DisplayTextureDropdown("Albedo", &albedoName);
         DisplayTextureDropdown("Normals", &normalsName);
@@ -195,9 +201,10 @@ void SceneEditor::SelectedEntityUI()
                 em->AddComponent<Material>(selectedEntity, material);
             }
         }
+        ImGui::TreePop();
     }
 
-    if (transform == nullptr)
+    if (transform == nullptr && ImGui::TreeNode("New Transform Component"))
     {
         ImGui::DragFloat3("Position: ", &pos.x, 0.05f);
         ImGui::DragFloat3("Scale: ", &scale.x, 0.05f);
@@ -213,9 +220,10 @@ void SceneEditor::SelectedEntityUI()
 
             em->AddComponent<Transform>(selectedEntity, transform);
         }
+        ImGui::TreePop();
     }
 
-    if (light == nullptr)
+    if (light == nullptr && ImGui::TreeNode("New Light Component"))
     {
         if (ImGui::TreeNode("Light Component"))
         {
@@ -241,14 +249,16 @@ void SceneEditor::SelectedEntityUI()
             }
             ImGui::TreePop();
         }
+        ImGui::TreePop();
     }
 
-    if (ro == nullptr)
+    if (ro == nullptr && ImGui::TreeNode("New RaycastingObject Component"))
     {
         if (ImGui::Button("Add Raycast Object"))
         {
             em->AddComponent<RaycastObject>(selectedEntity, new RaycastObject());
         }
+        ImGui::TreePop();
     }
 }
 
@@ -272,6 +282,7 @@ void SceneEditor::DisplayEntityComponents(int e)
 
     if (mesh != nullptr)
     {
+        ImGui::SetNextItemOpen(true);
         if (ImGui::TreeNode("Mesh"))
         {
             ImGui::Text(mesh->name.c_str());
@@ -289,6 +300,7 @@ void SceneEditor::DisplayEntityComponents(int e)
     }
     if (material != nullptr)
     {
+        ImGui::SetNextItemOpen(true);
         if (ImGui::TreeNode("Material"))
         {
             bool changedTexture = false;
@@ -324,6 +336,7 @@ void SceneEditor::DisplayEntityComponents(int e)
     }
     if (transform != nullptr)
     {
+        ImGui::SetNextItemOpen(true);
         if (ImGui::TreeNode("Transform"))
         {
             auto position = transform->position;
@@ -353,6 +366,7 @@ void SceneEditor::DisplayEntityComponents(int e)
     }
     if (light != nullptr)
     {
+        ImGui::SetNextItemOpen(true);
         if (ImGui::TreeNode("Light"))
         {
             auto lightType = light->data.lightType;
@@ -401,6 +415,7 @@ void SceneEditor::DisplayEntityComponents(int e)
     }
     if (ro != nullptr)
     {
+        ImGui::SetNextItemOpen(true);
         if (ImGui::TreeNode("Raycast Object"))
         {
             if (ImGui::Button("Remove Raycast Object"))

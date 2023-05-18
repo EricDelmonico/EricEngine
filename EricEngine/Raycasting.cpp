@@ -9,8 +9,12 @@
 
 using namespace DirectX;
 
+int Raycasting::hitEntity = INVALID_ENTITY;
+
 void Raycasting::Update(float dt)
 {
+    hitEntity = INVALID_ENTITY;
+
     auto& em = ECS::EntityManager::GetInstance();
 
     // Get all meshes in the scene
@@ -104,6 +108,8 @@ void Raycasting::Update(float dt)
 
     // No intersection
     if (closestEntity == INVALID_ENTITY) return;
+
+    hitEntity = closestEntity;
 
 #if _DEBUG
     Material* mat = em.GetComponent<Material>(closestEntity);
